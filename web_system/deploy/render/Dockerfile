@@ -29,6 +29,7 @@ RUN apk add --no-cache \
     fcgi \
     gettext \
     icu-dev \
+    linux-headers \
     libzip-dev \
     nginx \
     oniguruma-dev \
