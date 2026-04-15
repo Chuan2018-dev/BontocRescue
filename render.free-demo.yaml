@@ -1,0 +1,106 @@
+# Free demo blueprint for:
+# - Render free web service
+# - Render free Postgres
+#
+# Use this only for online testing and mobile-access verification.
+# This profile intentionally disables the AI service and stores uploads locally.
+# Free Render Postgres expires after 30 days, and free web services spin down on idle.
+
+databases:
+  - name: stitch-demo-db
+    plan: free
+    region: singapore
+    databaseName: stitch_demo
+    user: stitch_demo_user
+
+services:
+  - type: web
+    name: stitch-web-demo
+    runtime: docker
+    dockerfilePath: ./web_system/deploy/render/Dockerfile
+    dockerContext: ./web_system
+    region: singapore
+    plan: free
+    autoDeployTrigger: commit
+    healthCheckPath: /system/version
+    envVars:
+      - key: APP_NAME
+        value: Stitch Rescue Demo
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false
+      - key: APP_KEY
+        sync: false
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: stitch-demo-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: stitch-demo-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: stitch-demo-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: stitch-demo-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: stitch-demo-db
+          property: password
+      - key: DB_SSLMODE
+        value: prefer
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: local
+      - key: AI_SEVERITY_ENABLED
+        value: "false"
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: REVERB_APP_ID
+        value: stitch-reverb-app
+      - key: REVERB_APP_KEY
+        sync: false
+      - key: REVERB_APP_SECRET
+        sync: false
+      - key: REVERB_HOST
+        sync: false
+      - key: REVERB_PORT
+        value: "443"
+      - key: REVERB_SCHEME
+        value: https
+      - key: REVERB_SERVER_HOST
+        value: 127.0.0.1
+      - key: REVERB_SERVER_PORT
+        value: "8080"
+      - key: ROUTING_SERVICE_ENABLED
+        value: "true"
+      - key: ROUTING_SERVICE_URL
+        value: https://router.project-osrm.org
+      - key: ROUTING_SERVICE_PROFILE
+        value: driving
+      - key: ROUTING_SERVICE_TIMEOUT
+        value: "8"
+      - key: ROUTING_SERVICE_CACHE_TTL_MINUTES
+        value: "10"
+      - key: ROUTING_SERVICE_PROVIDER
+        value: OSRM Public Routing

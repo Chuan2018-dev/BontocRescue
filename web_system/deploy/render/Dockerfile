@@ -39,6 +39,7 @@ RUN apk add --no-cache \
     exif \
     intl \
     opcache \
+    pdo_pgsql \
     pcntl \
     pdo_mysql \
     sockets \

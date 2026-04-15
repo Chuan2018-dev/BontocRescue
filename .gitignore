@@ -11,6 +11,7 @@ Thumbs.db
 **/.env.*
 !**/.env.example
 !**/.env.render.example
+!**/.env.render.free-demo.example
 **/auth.json
 
 # Logs
@@ -72,4 +73,3 @@ ai_service/datasets/**/extracted/
 ai_service/datasets/**/import_staging/
 ai_service/datasets/**/images/
 ai_service/datasets/**/reviewed_pool/
-

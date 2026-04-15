@@ -1,5 +1,10 @@
 # Online Deployment Plan
 
+If you want strict free online testing first, use:
+
+- `DEPLOYMENT_RENDER_FREE_DEMO.md`
+- `render.free-demo.yaml`
+
 This repository is best deployed as:
 
 1. `Render web service` for Laravel + PWA + Reverb
