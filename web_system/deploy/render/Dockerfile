@@ -32,6 +32,7 @@ RUN apk add --no-cache \
     libzip-dev \
     nginx \
     oniguruma-dev \
+    postgresql-dev \
     shadow \
     zip \
     && docker-php-ext-install \
