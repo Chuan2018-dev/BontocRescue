@@ -35,6 +35,8 @@ This workspace now contains the mobile app, web system, database references, AI 
 - `PRODUCTION_SECRETS_CHECKLIST.md` contains the blank production secret worksheet for Render, Railway, and R2
 - `GITHUB_RENDER_IMPORT_CHECKLIST.md` contains the step-by-step GitHub push and Render import checklist
 - `GITHUB_FIRST_PUSH_COMMANDS.md` contains the exact first-push Git commands for this local folder
+- `RENDER_DEPLOY_QUICKSTART.md` contains the shortest safe deployment flow for the live GitHub repo
+- `CONTRIBUTING.md` contains the repo workflow and push rules
 
 ## UI Reference Folders
 

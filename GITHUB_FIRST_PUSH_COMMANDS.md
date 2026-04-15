@@ -1,5 +1,12 @@
 # GitHub First Push Commands
 
+Historical note:
+
+- the first push is already complete
+- active repo: `https://github.com/Chuan2018-dev/BontocRescue`
+
+Use this file only if you need to recreate the same connection from a fresh local folder.
+
 Current local project path:
 
 ```text
@@ -8,7 +15,8 @@ C:\Users\Christian\OneDrive\Pictures\stich\stitch updated\stitch
 
 Current state:
 
-- this folder is `not` yet a Git repository
+- the current working folder is already connected to GitHub
+- these commands are for a fresh clone or a new local copy
 
 Use these exact commands for the first push.
 
@@ -36,15 +44,15 @@ At GitHub:
 
 Examples:
 
-- `https://github.com/YOUR_USERNAME/stitch-rescue.git`
-- `git@github.com:YOUR_USERNAME/stitch-rescue.git`
+- `https://github.com/Chuan2018-dev/BontocRescue.git`
+- `git@github.com:Chuan2018-dev/BontocRescue.git`
 
 ## 4. Add the remote
 
 Replace the URL below with your real GitHub repository URL:
 
 ```bash
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git remote add origin https://github.com/Chuan2018-dev/BontocRescue.git
 ```
 
 ## 5. Rename the default branch to main

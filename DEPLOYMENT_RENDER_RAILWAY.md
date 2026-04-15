@@ -7,6 +7,10 @@ This repository is best deployed as:
 3. `Railway MySQL` for the production database
 4. `S3-compatible object storage` for evidence uploads
 
+Current GitHub repository:
+
+- `https://github.com/Chuan2018-dev/BontocRescue`
+
 This is the recommended layout for the current codebase because the project already depends on:
 
 - Laravel web + auth + uploads
@@ -74,6 +78,12 @@ This is the recommended layout for the current codebase because the project alre
 ### 1. Push the repository to GitHub
 
 Render and Railway are easiest to connect from a GitHub repo.
+
+This repo is already connected. Use:
+
+```bash
+git push origin main
+```
 
 ### 2. Create the MySQL database
 

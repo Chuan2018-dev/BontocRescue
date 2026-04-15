@@ -25,28 +25,24 @@ Confirm these files exist:
 
 ## 2. Push to GitHub
 
-If Git is not initialized yet:
+This repo is already connected to:
+
+- `https://github.com/Chuan2018-dev/BontocRescue`
+
+From the project root:
 
 ```bash
-git init
-git add .
-git commit -m "Prepare Render deployment scaffold"
+git remote -v
+git status
+git push origin main
 ```
 
-Add the GitHub remote and push:
-
-```bash
-git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
-git branch -M main
-git push -u origin main
-```
-
-If the remote already exists:
+If you make more changes later:
 
 ```bash
 git add .
 git commit -m "Update deployment config"
-git push
+git push origin main
 ```
 
 ## 3. Create Railway MySQL
@@ -92,7 +88,8 @@ At Render:
 1. Click `New`
 2. Choose `Blueprint`
 3. Connect GitHub if needed
-4. Select the repository
+4. Select the repository:
+   - `Chuan2018-dev/BontocRescue`
 5. Render will detect `render.yaml`
 
 Expected services:
