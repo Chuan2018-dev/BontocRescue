@@ -1,0 +1,8 @@
+image_relative_path,review_status,quality_flag,duplicate_candidate,label_confidence,reviewer_name,review_notes
+local_validation/images/minor/starter_minor_fiat_seicento_01.jpg,provisional_public_seed,none,no,medium,Codex,"Starter Wikimedia seed imported for non-local validation bootstrapping."
+local_validation/images/minor/starter_minor_em_fender_bender_01.jpg,provisional_public_seed,none,no,high,Codex,"Low-severity vehicle damage seed from a public fender-bender scene."
+local_validation/images/serious/starter_serious_calauan_laguna_01.jpg,provisional_public_seed,none,no,high,Codex,"Philippines road crash context from Laguna."
+local_validation/images/serious/starter_serious_bike_crash_01.jpg,provisional_public_seed,vulnerable_road_user,no,medium,Codex,"Bike crash sample for side-impact and vulnerable-road-user evaluation."
+local_validation/images/serious/starter_serious_snowstorm_air_ambulance_01.jpg,provisional_public_seed,severe_weather,no,high,Codex,"Useful for bad-weather slice even though not local."
+local_validation/images/serious/starter_serious_thailand_night_motorcycle_01.jpg,provisional_public_seed,low_light,no,medium,Codex,"Motorcycle plus night-visibility probe sample."
+local_validation/images/fatal/starter_fatal_calgary_van_scene_01.jpg,provisional_public_seed,low_light,no,high,Codex,"Fatal scene label backed by source description."

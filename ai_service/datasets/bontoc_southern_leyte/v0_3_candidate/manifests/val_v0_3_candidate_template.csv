@@ -1,0 +1,4 @@
+image_relative_path,severity_label,source_domain,municipality,province,barangay,latitude,longitude,incident_type,road_type,weather,lighting_condition,vehicle_types,motorcycle_present,multi_vehicle,rural_scene,split_usage,source_pool_reference
+v0_3_candidate/images/val/minor/val_minor_0001.jpg,minor,road_accident,,,,,,vehicular_accident,urban_road,clear,daylight,car|police_vehicle,no,no,no,val,v0_3_candidate/reviewed_pool/minor/starter_minor_police_cleanup_01.jpg
+v0_3_candidate/images/val/serious/val_serious_0001.jpg,serious,road_accident,Pulilan,Bulacan,,,,vehicular_accident,national_road,clear,daylight,car|ambulance|police_vehicle,no,yes,no,val,v0_3_candidate/reviewed_pool/serious/starter_serious_pulilan_ems_02.jpg
+v0_3_candidate/images/val/fatal/val_fatal_0001.jpg,fatal,road_accident,,,,,,vehicular_accident,urban_road,clear,daylight,car|police_vehicle,no,yes,no,val,v0_3_candidate/reviewed_pool/fatal/starter_fatal_acpd_investigation_01.jpg

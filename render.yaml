@@ -1,0 +1,132 @@
+# Reference blueprint for:
+# - Render web service: Laravel + PWA + Reverb
+# - Render private service: FastAPI AI
+# - Railway MySQL
+# - Cloudflare R2 storage
+#
+# Replace every `sync: false` value in Render with real secrets.
+# Keep APP_URL and REVERB_HOST on the same public domain.
+
+services:
+  - type: web
+    name: stitch-web
+    runtime: docker
+    dockerfilePath: ./web_system/deploy/render/Dockerfile
+    dockerContext: ./web_system
+    region: singapore
+    plan: starter
+    autoDeployTrigger: commit
+    healthCheckPath: /system/version
+    envVars:
+      - key: APP_NAME
+        value: Stitch Rescue Web
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false
+      - key: APP_KEY
+        sync: false
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: info
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: CACHE_STORE
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+      - key: FILESYSTEM_DISK
+        value: s3
+      - key: AWS_ACCESS_KEY_ID
+        sync: false
+      - key: AWS_SECRET_ACCESS_KEY
+        sync: false
+      - key: AWS_DEFAULT_REGION
+        value: auto
+      - key: AWS_BUCKET
+        sync: false
+      - key: AWS_ENDPOINT
+        sync: false
+      - key: AWS_URL
+        sync: false
+      - key: AWS_USE_PATH_STYLE_ENDPOINT
+        value: "false"
+      - key: AI_SEVERITY_ENABLED
+        value: "true"
+      - key: AI_SEVERITY_SERVICE_HOST
+        fromService:
+          type: pserv
+          name: stitch-ai
+          property: host
+      - key: AI_SEVERITY_SERVICE_PORT
+        fromService:
+          type: pserv
+          name: stitch-ai
+          property: port
+      - key: AI_SEVERITY_TIMEOUT
+        value: "20"
+      - key: AI_SEVERITY_DISPATCH
+        value: sync
+      - key: AI_SEVERITY_MODEL_NAME
+        value: bontoc_southern_leyte_production_candidate_external
+      - key: AI_SEVERITY_MODEL_VERSION
+        value: "0.2.0"
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: REVERB_APP_ID
+        value: stitch-reverb-app
+      - key: REVERB_APP_KEY
+        sync: false
+      - key: REVERB_APP_SECRET
+        sync: false
+      - key: REVERB_HOST
+        sync: false
+      - key: REVERB_PORT
+        value: "443"
+      - key: REVERB_SCHEME
+        value: https
+      - key: REVERB_SERVER_HOST
+        value: 127.0.0.1
+      - key: REVERB_SERVER_PORT
+        value: "8080"
+      - key: ROUTING_SERVICE_ENABLED
+        value: "true"
+      - key: ROUTING_SERVICE_URL
+        value: https://router.project-osrm.org
+      - key: ROUTING_SERVICE_PROFILE
+        value: driving
+      - key: ROUTING_SERVICE_TIMEOUT
+        value: "8"
+      - key: ROUTING_SERVICE_CACHE_TTL_MINUTES
+        value: "10"
+      - key: ROUTING_SERVICE_PROVIDER
+        value: OSRM Public Routing
+
+  - type: pserv
+    name: stitch-ai
+    runtime: docker
+    dockerfilePath: ./ai_service/deploy/render/Dockerfile
+    dockerContext: ./ai_service
+    region: singapore
+    plan: starter
+    autoDeployTrigger: commit
+    envVars:
+      - key: AI_SERVICE_HOST
+        value: 0.0.0.0
