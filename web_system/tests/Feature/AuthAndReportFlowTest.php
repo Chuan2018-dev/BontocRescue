@@ -56,6 +56,20 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('Download App');
     }
 
+    public function test_login_form_uses_https_when_served_behind_render_proxy(): void
+    {
+        $this
+            ->withServerVariables([
+                'HTTP_X_FORWARDED_PROTO' => 'https',
+                'HTTP_X_FORWARDED_HOST' => 'stitch-web-demo.onrender.com',
+                'HTTP_X_FORWARDED_PORT' => '443',
+            ])
+            ->get('http://stitch-web-demo.onrender.com/login')
+            ->assertOk()
+            ->assertSee('action="https://stitch-web-demo.onrender.com/login"', false)
+            ->assertDontSee('action="http://stitch-web-demo.onrender.com/login"', false);
+    }
+
     public function test_system_version_endpoint_returns_no_store_json_for_auto_updates(): void
     {
         $response = $this->get(route('system.version'))
