@@ -5,7 +5,16 @@ export PORT="${PORT:-10000}"
 
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/http.d/default.conf
 
-mkdir -p /run/nginx /var/lib/nginx/tmp/client_body /var/log/nginx
+mkdir -p \
+    /run/nginx \
+    /var/lib/nginx/tmp/client_body \
+    /var/log/nginx \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    bootstrap/cache
+
+chown -R www-data:www-data storage bootstrap/cache
 
 php artisan storage:link || true
 php artisan migrate --force
