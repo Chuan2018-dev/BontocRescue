@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selfiePreviewImage = root.querySelector('[data-selfie-preview-image]');
     const selfiePreviewName = root.querySelector('[data-selfie-preview-name]');
     const evidenceBadge = root.querySelector('[data-capture-badge="evidence"]');
+    const videoBadge = root.querySelector('[data-capture-badge="video"]');
     const selfieBadge = root.querySelector('[data-capture-badge="selfie"]');
     const gpsBadge = root.querySelector('[data-capture-badge="gps"]');
     const photoRequirement = root.querySelector('[data-requirement-status="photo"]');
@@ -88,6 +89,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ?? videoCaptureInput?.files?.[0]
         ?? evidenceInput?.files?.[0]
         ?? null;
+
+    const getActiveVideoFile = () => videoCaptureInput?.files?.[0] ?? null;
 
     const getActiveSelfieFile = () =>
         selfieCaptureInput?.files?.[0]
@@ -404,6 +407,11 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCivilianReadiness();
     };
 
+    const updateVideoBadge = () => {
+        const videoFile = getActiveVideoFile();
+        setBadgeState(videoBadge, videoFile instanceof File ? 'blue' : 'neutral', videoFile instanceof File ? 'Video ready' : 'Optional');
+    };
+
     const updateSelfiePreview = (file) => {
         revokePreviewUrl(selfiePreviewUrl);
         selfiePreviewUrl = null;
@@ -532,14 +540,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     photoCaptureInput?.addEventListener('change', () => {
-        clearInputFile(videoCaptureInput);
         clearInputFile(evidenceInput);
         updateEvidencePreview(getActiveEvidenceFile());
     });
 
     videoCaptureInput?.addEventListener('change', () => {
-        clearInputFile(photoCaptureInput);
-        clearInputFile(evidenceInput);
+        updateVideoBadge();
         updateEvidencePreview(getActiveEvidenceFile());
     });
 
@@ -551,6 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
     evidenceInput?.addEventListener('change', () => {
         clearInputFile(photoCaptureInput);
         clearInputFile(videoCaptureInput);
+        updateVideoBadge();
         updateEvidencePreview(getActiveEvidenceFile());
     });
 
@@ -560,6 +567,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     updateEvidencePreview(getActiveEvidenceFile());
+    updateVideoBadge();
     updateSelfiePreview(getActiveSelfieFile());
 
     if ((latitudeInput instanceof HTMLInputElement && latitudeInput.value.trim()) || (longitudeInput instanceof HTMLInputElement && longitudeInput.value.trim())) {

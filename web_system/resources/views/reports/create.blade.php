@@ -8,30 +8,23 @@
 @section('title', $isCivilian ? 'Send Emergency Report' : 'Create Report')
 @section('page_label', $isCivilian ? 'Send Report' : 'Manual Report Entry')
 @section('page_heading', $isCivilian ? 'Civilian Emergency Report' : 'Create an Incident from the Web Dashboard')
-@section('page_subheading', $isCivilian ? 'Use this camera-first civilian form to capture the scene, take a verification selfie, lock GPS, and send the emergency report quickly.' : 'Use this responder-side form for manual incident entry while preserving the standard Laravel incident workflow.')
+@section('page_subheading', $isCivilian ? 'Use four simple actions: capture photo, record video, capture selfie, and lock GPS.' : 'Use this responder-side form for manual incident entry while preserving the standard Laravel incident workflow.')
 
 @section('hero')
     @if ($isCivilian)
-        <section class="hero-card" style="background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(225,241,255,.95));border-color:rgba(32,104,174,.16);">
-            <div class="hero-grid">
+        <section class="hero-card civilian-report-hero">
+            <div class="civilian-report-hero-grid">
                 <div class="hero-copy">
-                    <p class="eyebrow">Civilian Reporting Flow</p>
-                    <h2>Report the emergency first. We will keep the form simple and focused.</h2>
-                    <p>
-                        This civilian version is different from the responder entry page. It focuses only on the information you need to send quickly:
-                        scene capture, verification selfie, location, transport mode, GPS, and the core incident details responders need first.
-                    </p>
-                    <div class="hero-actions">
-                        <a href="#report-form" class="btn btn-primary">Start Reporting</a>
-                        <a href="{{ route('reports.index') }}" class="btn btn-secondary">Open Report History</a>
-                        <a href="{{ route('settings.readiness') }}" class="btn btn-secondary">Check Device Readiness</a>
-                    </div>
+                    <p class="eyebrow">Civilian Emergency Report</p>
+                    <h2>Four taps first, then send.</h2>
+                    <p>Capture the scene, add optional video, verify with selfie, and lock GPS. The screen stays simple for phone use.</p>
+                    <a href="#report-form" class="btn btn-primary">Start Report</a>
                 </div>
-                <div class="hero-metrics">
-                    <article class="metric-card"><span>Step 1</span><strong>Capture</strong><p>Take a photo or video of the incident first while the scene is still visible.</p></article>
-                    <article class="metric-card"><span>Step 2</span><strong>Verify</strong><p>Take a verification selfie so the report has sender identity confirmation.</p></article>
-                    <article class="metric-card"><span>Step 3</span><strong>Locate</strong><p>Lock the GPS and add the barangay, road, or landmark if needed.</p></article>
-                    <article class="metric-card"><span>Step 4</span><strong>Send</strong><p>Submit online or keep a local draft ready if signal becomes unstable.</p></article>
+                <div class="civilian-report-quick-list" aria-label="Report actions">
+                    <span>Photo</span>
+                    <span>Video</span>
+                    <span>Selfie</span>
+                    <span>GPS</span>
                 </div>
             </div>
         </section>
@@ -67,8 +60,8 @@
         <div class="panel-head">
             <div class="panel-heading">
                 <p class="panel-kicker">{{ $isCivilian ? 'Emergency Form' : 'Incident Form' }}</p>
-                <h2 class="panel-title">{{ $isCivilian ? 'Send emergency details' : 'Emergency details' }}</h2>
-                <p class="section-copy">{{ $isCivilian ? 'Capture the scene first, then complete the fields below so responders can review your report, location, verification selfie, and attached evidence.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
+                <h2 class="panel-title">{{ $isCivilian ? 'Four buttons only' : 'Emergency details' }}</h2>
+                <p class="section-copy">{{ $isCivilian ? 'Tap Capture Photo, Record Video, Capture Selfie, and Lock GPS. Add a short description before sending.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
             </div>
         </div>
 
@@ -79,90 +72,69 @@
         <form method="POST" action="{{ route('reports.store') }}" enctype="multipart/form-data" class="stack" data-report-draft-form data-report-role="{{ $isCivilian ? 'civilian' : 'responder' }}">
             @csrf
 
-            <div class="report-form-shell">
-                <div class="report-form-main">
-                    @if ($isCivilian)
-                        <div class="form-step-card" style="background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(230,242,255,.96));border-color:rgba(32,104,174,.16);">
-                            <span class="form-step-label">Step 1 - Capture</span>
-                            <strong>Camera-first emergency capture</strong>
-                            <p>Start with the required field actions first. Capture a scene photo, take a verification selfie, lock the GPS, then add the short description before the report can be sent.</p>
+            @if ($isCivilian)
+                <div class="civilian-report-mobile-flow">
+                    <section class="form-step-card civilian-capture-panel">
+                        <span class="form-step-label">Emergency Report</span>
+                        <strong>Tap the four buttons below.</strong>
+                        <p class="civilian-mobile-hint">Use these in order: photo, video if needed, selfie, then GPS. The report unlocks after photo, selfie, GPS, and short description are ready.</p>
 
-                            <div class="detail-card" style="background:{{ $evidenceUploadError ? 'linear-gradient(135deg,rgba(255,244,244,.98),rgba(255,232,232,.96))' : 'linear-gradient(135deg,rgba(255,249,246,.98),rgba(255,241,236,.96))' }};border-color:{{ $evidenceUploadError ? 'rgba(185,28,28,.24)' : 'rgba(214,66,35,.18)' }};">
-                                <div class="tag-row">
-                                    <span class="tag red">{{ $evidenceUploadError ? 'Photo rejected' : 'Real scene photo only' }}</span>
-                                    <span class="tag neutral">No screenshots, app UI, or dummy photos</span>
-                                </div>
-                                <strong>{{ $evidenceUploadError ? 'Upload a clearer real accident or emergency scene photo.' : 'Upload a real accident or emergency scene photo.' }}</strong>
-                                <p>Use a photo that clearly shows the actual accident, emergency, injury, hazard, damaged vehicle, blocked road, smoke, fire, flood, or active rescue scene.</p>
-                                <div class="report-requirements-grid" style="margin-top:.9rem;">
-                                    <article class="requirement-item">
-                                        <strong>Accepted</strong>
-                                        <p>Road crash, injured person, damaged vehicle, roadside hazard, fire, flood, or active emergency response.</p>
-                                    </article>
-                                    <article class="requirement-item">
-                                        <strong>Not accepted</strong>
-                                        <p>Selfie-only photos, chat screenshots, app pages, social media posts, memes, icons, or unrelated normal pictures.</p>
-                                    </article>
-                                </div>
-                                @if ($evidenceUploadError)
-                                    <p class="section-copy" style="margin-top:.85rem;color:#b91c1c;font-weight:700;">{{ $evidenceUploadError }}</p>
-                                @endif
+                        <input type="file" name="evidence_photo_capture" accept="image/*" capture="environment" hidden data-capture-photo-input>
+                        <input type="file" name="evidence_video_capture" accept="video/*" capture="environment" hidden data-capture-video-input>
+                        <input type="file" name="selfie_capture" accept="image/*" capture="user" hidden data-capture-selfie-input>
+                        <input id="evidence" type="file" name="evidence" accept=".jpg,.jpeg,.png,.webp" hidden>
+                        <input id="selfie" type="file" name="selfie" accept=".jpg,.jpeg,.png,.webp" hidden>
+                        <input type="hidden" name="incident_type" value="{{ old('incident_type', 'General Emergency') }}">
+                        <input type="hidden" name="transmission_type" value="{{ old('transmission_type', 'online') }}">
+                        <input type="hidden" name="severity" value="{{ old('severity') }}">
+                        <input id="location_text" type="hidden" name="location_text" value="{{ old('location_text') }}">
+                        <input id="latitude" type="hidden" name="latitude" value="{{ old('latitude') }}" data-geo-latitude>
+                        <input id="longitude" type="hidden" name="longitude" value="{{ old('longitude') }}" data-geo-longitude>
+                        <button type="button" class="visually-hidden-control" data-geo-fill-button>Get Current Latitude and Longitude</button>
+
+                        <div class="capture-action-grid civilian-four-button-grid">
+                            <button type="button" class="setting-card capture-action-card" data-capture-trigger="photo">
+                                <span class="capture-action-icon">01</span>
+                                <strong>Capture Photo</strong>
+                                <p>Required scene photo.</p>
+                                <span class="tag neutral" data-capture-badge="evidence">Photo pending</span>
+                            </button>
+                            <button type="button" class="setting-card capture-action-card" data-capture-trigger="video">
+                                <span class="capture-action-icon">02</span>
+                                <strong>Record Video</strong>
+                                <p>Optional extra evidence.</p>
+                                <span class="tag neutral" data-capture-badge="video">Optional</span>
+                            </button>
+                            <button type="button" class="setting-card capture-action-card" data-capture-trigger="selfie">
+                                <span class="capture-action-icon">03</span>
+                                <strong>Capture Selfie</strong>
+                                <p>Required verification.</p>
+                                <span class="tag neutral" data-capture-badge="selfie">Selfie pending</span>
+                            </button>
+                            <button type="button" class="setting-card capture-action-card" data-capture-trigger="gps">
+                                <span class="capture-action-icon">04</span>
+                                <strong>Lock GPS</strong>
+                                <p>Required location.</p>
+                                <span class="tag neutral" data-capture-badge="gps">GPS pending</span>
+                            </button>
+                        </div>
+
+                        <div class="civilian-mobile-status-card">
+                            <p data-capture-submit-status>Complete photo, selfie, GPS, and short description first.</p>
+                            <p data-geo-status>GPS not locked yet.</p>
+                            <div class="visually-hidden-control" aria-hidden="true">
+                                <span data-requirement-status="photo">Still required</span>
+                                <span data-requirement-status="selfie">Still required</span>
+                                <span data-requirement-status="gps">Still required</span>
+                                <span data-requirement-status="description">Still required</span>
+                                <span data-draft-queue-count>0 queued</span>
+                                <span data-draft-autosave-state>Autosave ready</span>
+                                <span data-draft-status>Draft ready.</span>
                             </div>
+                        </div>
 
-                            <input type="file" name="evidence_photo_capture" accept="image/*" capture="environment" hidden data-capture-photo-input>
-                            <input type="file" name="evidence_video_capture" accept="video/*" capture="environment" hidden data-capture-video-input>
-                            <input type="file" name="selfie_capture" accept="image/*" capture="user" hidden data-capture-selfie-input>
-
-                            <div class="capture-action-grid">
-                                <button type="button" class="setting-card capture-action-card" data-capture-trigger="photo">
-                                    <strong>Capture Photo</strong>
-                                    <p>Required. Use the rear camera for the main still image of the incident scene.</p>
-                                    <span class="tag neutral" data-capture-badge="evidence">Evidence pending</span>
-                                </button>
-                                <button type="button" class="setting-card capture-action-card" data-capture-trigger="video">
-                                    <strong>Record Video</strong>
-                                    <p>Optional. A video does not replace the required scene photo for submission.</p>
-                                    <span class="tag neutral">Optional</span>
-                                </button>
-                                <button type="button" class="setting-card capture-action-card" data-capture-trigger="selfie">
-                                    <strong>Capture Selfie</strong>
-                                    <p>Required. Take a front-camera verification selfie before you submit the report.</p>
-                                    <span class="tag neutral" data-capture-badge="selfie">Selfie pending</span>
-                                </button>
-                                <button type="button" class="setting-card capture-action-card" data-capture-trigger="gps">
-                                    <strong>Lock GPS</strong>
-                                    <p>Required. Ask the browser for the current coordinates and fill the location fields.</p>
-                                    <span class="tag neutral" data-capture-badge="gps">GPS pending</span>
-                                </button>
-                            </div>
-
-                            <div class="detail-card form-readiness-card">
-                                <strong>Required before sending</strong>
-                                <div class="report-requirements-grid">
-                                    <article class="requirement-item">
-                                        <strong>Scene photo</strong>
-                                        <p>A captured or attached image is required for civilian submission.</p>
-                                        <span class="tag red" data-requirement-status="photo">Still required</span>
-                                    </article>
-                                    <article class="requirement-item">
-                                        <strong>Verification selfie</strong>
-                                        <p>Responders must be able to verify who sent the report.</p>
-                                        <span class="tag red" data-requirement-status="selfie">Still required</span>
-                                    </article>
-                                    <article class="requirement-item">
-                                        <strong>Locked GPS</strong>
-                                        <p>Latitude and longitude must be filled before sending.</p>
-                                        <span class="tag red" data-requirement-status="gps">Still required</span>
-                                    </article>
-                                    <article class="requirement-item">
-                                        <strong>Short description</strong>
-                                        <p>Add the basic incident summary so responders know what to expect.</p>
-                                        <span class="tag red" data-requirement-status="description">Still required</span>
-                                    </article>
-                                </div>
-                                <p class="section-copy" data-capture-submit-status>Complete the four required steps first. The Send Emergency Report button will stay locked until all of them are ready.</p>
-                            </div>
-
+                        <details class="civilian-compact-details">
+                            <summary>Show selected photo and selfie preview</summary>
                             <div class="preview-grid">
                                 <article class="preview-card">
                                     <strong>Scene evidence preview</strong>
@@ -176,152 +148,153 @@
                                     <p data-selfie-preview-name>No verification selfie selected yet.</p>
                                 </article>
                             </div>
+                        </details>
 
-                            <div class="detail-card inline-warning-card" data-evidence-preview-warning-card hidden data-warning-tone="amber">
-                                <div class="tag-row">
-                                    <span class="tag amber" data-evidence-preview-warning-tag>Preview check</span>
-                                    <span class="tag neutral">Soft warning before AI validation</span>
-                                </div>
-                                <strong data-evidence-preview-warning-title>Review the selected evidence photo.</strong>
-                                <p data-evidence-preview-warning-body>The selected file may not look like a real accident or emergency scene photo. Replace it now if it seems unrelated.</p>
-                                <ul class="section-copy warning-reason-list" data-evidence-preview-warning-list></ul>
-                                <div class="button-row warning-actions">
-                                    <button type="button" class="btn btn-primary" data-evidence-replace-trigger>Replace Photo</button>
-                                    <button type="button" class="btn btn-secondary" data-warning-dismiss-trigger>Keep Current File</button>
-                                </div>
+                        <div class="detail-card inline-warning-card" data-evidence-preview-warning-card hidden data-warning-tone="amber">
+                            <div class="tag-row">
+                                <span class="tag amber" data-evidence-preview-warning-tag>Preview check</span>
+                                <span class="tag neutral">Photo review</span>
+                            </div>
+                            <strong data-evidence-preview-warning-title>Review the selected evidence photo.</strong>
+                            <p data-evidence-preview-warning-body>The selected file may not look like a real accident or emergency scene photo. Replace it now if it seems unrelated.</p>
+                            <ul class="section-copy warning-reason-list" data-evidence-preview-warning-list></ul>
+                            <div class="button-row warning-actions">
+                                <button type="button" class="btn btn-primary" data-evidence-replace-trigger>Replace Photo</button>
+                                <button type="button" class="btn btn-secondary" data-warning-dismiss-trigger>Keep Current File</button>
                             </div>
                         </div>
-                    @endif
+                    </section>
 
-                    <div class="form-step-card">
-                        <span class="form-step-label">Step 2 - Describe</span>
-                        <strong>Emergency details</strong>
-                        <p>Keep this part short and direct so responders can understand the incident quickly on a phone screen.</p>
-                        <div class="form-grid">
-                            <div class="field">
-                                <label for="incident_type">Incident type</label>
-                                <input id="incident_type" class="input" type="text" name="incident_type" value="{{ old('incident_type', $isCivilian ? 'General Emergency' : 'General Emergency') }}" placeholder="Vehicular Accident, Landslide, Fire, Injury" required>
-                            </div>
-                            <div class="field">
-                                <label for="transmission_type">Transmission</label>
-                                <select id="transmission_type" name="transmission_type">
-                                    <option value="online" @selected(old('transmission_type', 'online') === 'online')>Online</option>
-                                    <option value="lora" @selected(old('transmission_type') === 'lora')>LoRa</option>
-                                </select>
-                            </div>
-                            <div class="field">
-                                <label for="severity">{{ $isCivilian ? 'Severity preference' : 'Severity override' }}</label>
-                                <select id="severity" name="severity">
-                                    <option value="">AI detect</option>
-                                    @foreach (['Minor', 'Serious', 'Fatal'] as $severity)
-                                        <option value="{{ $severity }}" @selected(old('severity') === $severity)>{{ $severity }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-
+                    <section class="form-step-card civilian-description-panel">
+                        <span class="form-step-label">Short Description</span>
+                        <strong>What happened?</strong>
                         <div class="field">
                             <label for="description">Short description</label>
-                            <textarea id="description" class="textarea" name="description" required placeholder="Describe the incident, injuries, hazards, road condition, or what responders should expect." data-required-description>{{ old('description') }}</textarea>
+                            <textarea id="description" class="textarea" name="description" required placeholder="Example: Motorcycle crash near the barangay road, one injured person, road partially blocked." data-required-description>{{ old('description') }}</textarea>
                         </div>
-                    </div>
+                    </section>
 
-                    <div class="form-step-card">
-                        <span class="form-step-label">Step 3 - Locate</span>
-                        <strong>Location and GPS</strong>
-                        <p>Use the GPS button first if possible, then add a short place description such as barangay, road, or landmark.</p>
-                        <div class="field">
-                            <label for="location_text">Location description</label>
-                            <input id="location_text" class="input" type="text" name="location_text" value="{{ old('location_text') }}" placeholder="Barangay, road, landmark, or GPS text" required>
-                        </div>
-
-                        <div class="form-grid">
-                            <div class="field">
-                                <label for="latitude">Latitude</label>
-                                <input id="latitude" class="input" type="text" name="latitude" value="{{ old('latitude') }}" placeholder="17.089400" data-geo-latitude>
+                    <section class="form-step-card report-submit-card civilian-send-card">
+                        <strong>Ready to send?</strong>
+                        <p>The button stays locked until photo, selfie, GPS, and description are complete.</p>
+                        <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Send Emergency Report</button>
+                    </section>
+                </div>
+            @else
+                <div class="report-form-shell">
+                    <div class="report-form-main">
+                        <div class="form-step-card">
+                            <span class="form-step-label">Step 1 - Describe</span>
+                            <strong>Emergency details</strong>
+                            <p>Fill out the operational fields below to submit a new incident from the web dashboard.</p>
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="incident_type">Incident type</label>
+                                    <input id="incident_type" class="input" type="text" name="incident_type" value="{{ old('incident_type', 'General Emergency') }}" placeholder="Vehicular Accident, Landslide, Fire, Injury" required>
+                                </div>
+                                <div class="field">
+                                    <label for="transmission_type">Transmission</label>
+                                    <select id="transmission_type" name="transmission_type">
+                                        <option value="online" @selected(old('transmission_type', 'online') === 'online')>Online</option>
+                                        <option value="lora" @selected(old('transmission_type') === 'lora')>LoRa</option>
+                                    </select>
+                                </div>
+                                <div class="field">
+                                    <label for="severity">Severity override</label>
+                                    <select id="severity" name="severity">
+                                        <option value="">AI detect</option>
+                                        @foreach (['Minor', 'Serious', 'Fatal'] as $severity)
+                                            <option value="{{ $severity }}" @selected(old('severity') === $severity)>{{ $severity }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
+
                             <div class="field">
-                                <label for="longitude">Longitude</label>
-                                <input id="longitude" class="input" type="text" name="longitude" value="{{ old('longitude') }}" placeholder="120.977000" data-geo-longitude>
+                                <label for="description">Description</label>
+                                <textarea id="description" class="textarea" name="description" required placeholder="Describe the incident, injuries, hazards, road condition, or what responders should expect." data-required-description>{{ old('description') }}</textarea>
                             </div>
                         </div>
 
-                        <div class="detail-card">
-                            <strong>GPS coordinates</strong>
-                            <p>{{ $isCivilian ? 'Tap the button below to use your browser location and automatically fill the Latitude and Longitude fields. Allow browser location permission when prompted.' : 'Use your browser location to quickly populate the GPS coordinates for this manual report. Allow browser location permission when prompted.' }}</p>
+                        <div class="form-step-card">
+                            <span class="form-step-label">Step 2 - Locate</span>
+                            <strong>Location and GPS</strong>
+                            <p>Use your browser location to quickly populate the GPS coordinates for this manual report.</p>
+                            <div class="field">
+                                <label for="location_text">Location description</label>
+                                <input id="location_text" class="input" type="text" name="location_text" value="{{ old('location_text') }}" placeholder="Barangay, road, landmark, or GPS text" required>
+                            </div>
+                            <div class="form-grid">
+                                <div class="field">
+                                    <label for="latitude">Latitude</label>
+                                    <input id="latitude" class="input" type="text" name="latitude" value="{{ old('latitude') }}" placeholder="17.089400" data-geo-latitude>
+                                </div>
+                                <div class="field">
+                                    <label for="longitude">Longitude</label>
+                                    <input id="longitude" class="input" type="text" name="longitude" value="{{ old('longitude') }}" placeholder="120.977000" data-geo-longitude>
+                                </div>
+                            </div>
                             <div class="button-row">
                                 <button type="button" class="btn btn-secondary" data-geo-fill-button>Get Current Latitude and Longitude</button>
                             </div>
                             <p class="section-copy" data-geo-status>Waiting for manual entry or browser GPS request.</p>
                         </div>
-                    </div>
 
-                    <div class="form-step-card">
-                        <span class="form-step-label">Step 4 - Save Backup</span>
-                        <strong>Offline draft queue</strong>
-                        <p>{{ $isCivilian ? 'If the signal drops while you are encoding, this device can keep your report draft locally until you restore or resend it.' : 'Keep a local backup of the current manual report so command staff do not lose the encoded details during connectivity interruptions.' }}</p>
-                        <div class="tag-row">
-                            <span class="tag blue" data-draft-queue-count>0 queued</span>
-                            <span class="tag neutral" data-draft-autosave-state>Autosave ready</span>
-                        </div>
-                        <div class="button-row">
-                            <button type="button" class="btn btn-secondary" data-draft-save>Save Draft Now</button>
-                            <button type="button" class="btn btn-secondary" data-draft-restore>Restore Latest Draft</button>
-                            <button type="button" class="btn btn-danger" data-draft-clear>Clear Draft Queue</button>
-                        </div>
-                        <p class="section-copy" data-draft-status>Current form changes will stay on this device as a local draft, and offline submit will move the report into the queued draft list.</p>
-                    </div>
-                </div>
-
-                <div class="report-form-side">
-                    <div class="form-step-card">
-                        @if ($isCivilian)
-                            <span class="form-step-label">Fallback Upload</span>
-                        @endif
-                        <strong>{{ $isCivilian ? 'Capture fallback and verification' : 'Evidence upload' }}</strong>
-                        <p>{{ $isCivilian ? 'If direct camera capture is not available on this browser, use these fallback file pickers for the scene evidence and the verification selfie.' : 'Attach optional evidence for responder-side manual incident creation.' }}</p>
-                        <div class="field">
-                            <label for="evidence">{{ $isCivilian ? 'Scene photo file' : 'Photo or video file' }}</label>
-                            <input id="evidence" class="input" type="file" name="evidence" accept="{{ $isCivilian ? '.jpg,.jpeg,.png,.webp' : '.jpg,.jpeg,.png,.webp,.mp4,.mov,.avi,.3gp' }}">
-                        </div>
-                        <div class="field">
-                            <label for="selfie">{{ $isCivilian ? 'Verification selfie' : 'Verification selfie (optional)' }}</label>
-                            <input id="selfie" class="input" type="file" name="selfie" accept=".jpg,.jpeg,.png,.webp">
-                        </div>
-                        @if ($isCivilian)
-                            <p class="section-copy">Civilian web reporting now requires a scene photo, a verification selfie, GPS coordinates, and a short description before the report can be sent.</p>
-                        @endif
-                    </div>
-
-                    <div class="form-step-card">
-                        @if ($isCivilian)
-                            <span class="form-step-label">Quick Guide</span>
-                        @endif
-                        <strong>{{ $isCivilian ? 'Before you send' : 'Dispatch notes' }}</strong>
-                        <p>{{ $isCivilian ? 'Online mode sends full details, GPS, scene media, and your verification selfie. LoRa mode is best for fallback situations where internet is weak, but the report should still keep a local draft if signal drops.' : 'Use AI detect for severity when possible, or choose a manual severity value if command review already confirmed the level.' }}</p>
-                        <div class="tag-row">
-                            <span class="tag blue">Online</span>
-                            <span class="tag green">LoRa</span>
-                            <span class="tag neutral">GPS Ready</span>
-                        </div>
-                        <div class="button-row">
-                            <a href="{{ route('settings.readiness') }}" class="btn btn-secondary">Open Device Readiness Check</a>
+                        <div class="form-step-card">
+                            <span class="form-step-label">Step 3 - Save Backup</span>
+                            <strong>Offline draft queue</strong>
+                            <p>Keep a local backup of the current manual report so command staff do not lose encoded details during connectivity interruptions.</p>
+                            <div class="tag-row">
+                                <span class="tag blue" data-draft-queue-count>0 queued</span>
+                                <span class="tag neutral" data-draft-autosave-state>Autosave ready</span>
+                            </div>
+                            <div class="button-row">
+                                <button type="button" class="btn btn-secondary" data-draft-save>Save Draft Now</button>
+                                <button type="button" class="btn btn-secondary" data-draft-restore>Restore Latest Draft</button>
+                                <button type="button" class="btn btn-danger" data-draft-clear>Clear Draft Queue</button>
+                            </div>
+                            <p class="section-copy" data-draft-status>Current form changes will stay on this device as a local draft.</p>
                         </div>
                     </div>
 
-                    <div class="form-step-card report-submit-card">
-                        @if ($isCivilian)
-                            <span class="form-step-label">Final Step</span>
-                        @endif
-                        <strong>{{ $isCivilian ? 'Submission action' : 'Command action' }}</strong>
-                        <p>{{ $isCivilian ? 'The report stays locked until the required scene photo, verification selfie, GPS coordinates, and short description are all ready.' : 'Submit the incident now or return to the main incident feed.' }}</p>
-                        <div class="button-row">
-                            <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>{{ $isCivilian ? 'Send Emergency Report' : 'Submit Report' }}</button>
-                            <a href="{{ route('reports.index') }}" class="btn btn-secondary">Cancel</a>
+                    <div class="report-form-side">
+                        <div class="form-step-card">
+                            <strong>Evidence upload</strong>
+                            <p>Attach optional evidence for responder-side manual incident creation.</p>
+                            <div class="field">
+                                <label for="evidence">Photo or video file</label>
+                                <input id="evidence" class="input" type="file" name="evidence" accept=".jpg,.jpeg,.png,.webp,.mp4,.mov,.avi,.3gp">
+                            </div>
+                            <div class="field">
+                                <label for="selfie">Verification selfie (optional)</label>
+                                <input id="selfie" class="input" type="file" name="selfie" accept=".jpg,.jpeg,.png,.webp">
+                            </div>
+                        </div>
+
+                        <div class="form-step-card">
+                            <strong>Dispatch notes</strong>
+                            <p>Use AI detect for severity when possible, or choose a manual severity value if command review already confirmed the level.</p>
+                            <div class="tag-row">
+                                <span class="tag blue">Online</span>
+                                <span class="tag green">LoRa</span>
+                                <span class="tag neutral">GPS Ready</span>
+                            </div>
+                            <div class="button-row">
+                                <a href="{{ route('settings.readiness') }}" class="btn btn-secondary">Open Device Readiness Check</a>
+                            </div>
+                        </div>
+
+                        <div class="form-step-card report-submit-card">
+                            <strong>Command action</strong>
+                            <p>Submit the incident now or return to the main incident feed.</p>
+                            <div class="button-row">
+                                <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Submit Report</button>
+                                <a href="{{ route('reports.index') }}" class="btn btn-secondary">Cancel</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </form>
     </section>
 @endsection

@@ -74,43 +74,26 @@
 
 @section('title', $isCivilian ? 'Civilian Dashboard' : 'Responder Dashboard')
 @section('page_label', $isCivilian ? 'Civilian Dashboard' : 'Monitoring')
-@section('page_heading', $isCivilian ? 'Civilian Reporting Home' : 'Live Incident Feed')
-@section('page_subheading', $isCivilian ? 'Submit a new emergency report, review your report history, and manage your civilian account from one reporting workspace.' : 'Clean, responder-friendly monitoring for live incidents, dispatch priorities, and field communication status.')
+@section('page_heading', $isCivilian ? 'Civilian Home' : 'Live Incident Feed')
+@section('page_subheading', $isCivilian ? 'Simple phone-friendly access for sending emergency reports and checking your latest status.' : 'Clean, responder-friendly monitoring for live incidents, dispatch priorities, and field communication status.')
 
 @section('hero')
     @if ($isCivilian)
-        <section class="hero-card" style="background:linear-gradient(135deg,rgba(255,255,255,.94),rgba(236,245,255,.98));border-color:rgba(32,104,174,.14);">
-            <div class="hero-grid">
-                <div class="hero-copy">
+        <section class="hero-card civilian-simple-hero">
+            <div class="civilian-simple-hero-grid">
+                <div class="hero-copy civilian-simple-copy">
                     <p class="eyebrow">Civilian Home</p>
-                    <h2>Report fast, follow your updates easily, and keep the important actions visible first.</h2>
-                    <p>
-                        Logged in as <strong>{{ $user?->name }}</strong>. This civilian screen is trimmed down for phone use so the main tasks stay easy to find:
-                        send a report, check your latest status, update your account, and confirm device readiness before you go.
-                    </p>
-                    <div class="hero-actions">
+                    <h2>Need help? Send a report fast.</h2>
+                    <p>Logged in as <strong>{{ $user?->name }}</strong>. This home screen keeps only the actions civilians need most.</p>
+                    <div class="hero-actions civilian-simple-actions">
                         <a href="{{ route('reports.create') }}" class="btn btn-primary">Send Emergency Report</a>
                         <a href="{{ route('reports.index') }}" class="btn btn-secondary">Open Report History</a>
-                        <a href="{{ route('profile.show') }}" class="btn btn-secondary">Open Civilian Profile</a>
                     </div>
                 </div>
-                <div class="stack">
-                    <div class="hero-metrics">
-                        <article class="metric-card"><span>Total reports</span><strong>{{ $stats['total'] }}</strong><p>Reports already submitted from your civilian account.</p></article>
-                        <article class="metric-card"><span>Active</span><strong>{{ $stats['active'] }}</strong><p>Reports still waiting for responder action or monitoring.</p></article>
-                        <article class="metric-card"><span>Resolved</span><strong>{{ $stats['resolved'] }}</strong><p>Incidents already completed or cleared from the queue.</p></article>
-                        <article class="metric-card"><span>Today</span><strong>{{ $stats['today'] }}</strong><p>Reports sent from your account today.</p></article>
-                    </div>
-                    <article class="civilian-hero-callout">
-                        <p class="eyebrow" style="color:rgba(255,255,255,.72);">Before You Send</p>
-                        <h3>Four things must be ready first.</h3>
-                        <ul>
-                            <li>Capture a clear scene photo.</li>
-                            <li>Take your verification selfie.</li>
-                            <li>Lock the GPS on your current location.</li>
-                            <li>Add a short and direct description.</li>
-                        </ul>
-                    </article>
+                <div class="civilian-simple-stats" aria-label="Your report summary">
+                    <article><span>Total</span><strong>{{ $stats['total'] }}</strong></article>
+                    <article><span>Active</span><strong>{{ $stats['active'] }}</strong></article>
+                    <article><span>Today</span><strong>{{ $stats['today'] }}</strong></article>
                 </div>
             </div>
         </section>
@@ -143,213 +126,68 @@
 
 @section('content')
     @if ($isCivilian)
-        <section class="civilian-shell">
-            <section class="summary-strip">
-                <a href="{{ route('reports.create') }}" class="summary-card">
-                    <span>Quick action</span>
-                    <strong>Send Report</strong>
-                    <p>Open the camera-first emergency form immediately.</p>
-                </a>
-                <a href="{{ route('reports.index') }}" class="summary-card">
-                    <span>My history</span>
-                    <strong>{{ $stats['total'] }}</strong>
-                    <p>Review your submitted incidents and latest statuses.</p>
-                </a>
-                <a href="{{ route('profile.show') }}" class="summary-card">
-                    <span>Profile</span>
-                    <strong>Account</strong>
-                    <p>Update your identity, photo, and contact details.</p>
-                </a>
-                <a href="{{ route('settings.readiness') }}" class="summary-card">
-                    <span>Readiness</span>
-                    <strong>Device Check</strong>
-                    <p>Confirm camera, GPS, and notification access before reporting.</p>
-                </a>
-            </section>
-
-            <section class="civilian-home-grid">
-                <article class="panel">
-                    <div class="panel-head">
-                        <div class="panel-heading">
-                            <p class="panel-kicker">Quick Actions</p>
-                            <h2 class="panel-title">Civilian emergency access</h2>
-                            <p class="section-copy">The civilian workspace now keeps the most important actions in one clean mobile-first area, so you do not need to hunt through crowded cards.</p>
-                        </div>
-                    </div>
-                    <div class="civilian-action-grid">
-                        <a href="{{ route('reports.create') }}" class="civilian-action-card primary">
-                            <span class="civilian-kicker">Action 01</span>
-                            <strong>Send emergency report</strong>
-                            <p>Open the capture-first form for photo, selfie, GPS, and short description.</p>
-                        </a>
-                        <a href="{{ route('reports.index') }}" class="civilian-action-card">
-                            <span class="civilian-kicker">Action 02</span>
-                            <strong>Check my report history</strong>
-                            <p>Review your current status, report codes, and latest responder updates.</p>
-                        </a>
-                        <a href="{{ route('profile.show') }}" class="civilian-action-card">
-                            <span class="civilian-kicker">Action 03</span>
-                            <strong>Update my civilian profile</strong>
-                            <p>Fix your photo, contact details, and identity information before reporting again.</p>
-                        </a>
-                        <a href="{{ route('settings.readiness') }}" class="civilian-action-card">
-                            <span class="civilian-kicker">Action 04</span>
-                            <strong>Run device readiness check</strong>
-                            <p>Confirm camera, location, notifications, and online status before an emergency happens.</p>
-                        </a>
-                    </div>
-                </article>
-
-                <div class="stack">
-                    <article class="civilian-helper-card">
-                        <strong>What you need before sending</strong>
-                        <ul class="civilian-checklist">
-                            <li class="civilian-check-item">Scene photo captured clearly</li>
-                            <li class="civilian-check-item">Verification selfie ready</li>
-                            <li class="civilian-check-item">GPS locked on your location</li>
-                            <li class="civilian-check-item">Short description completed</li>
-                        </ul>
-                    </article>
-                    <article class="civilian-helper-card">
-                        <strong>Fast reminders</strong>
-                        <div class="civilian-pill-list">
-                            <span class="civilian-pill">Phone friendly layout</span>
-                            <span class="civilian-pill">iOS and Android ready</span>
-                            <span class="civilian-pill">Camera-first reporting</span>
-                            <span class="civilian-pill">Offline drafts available</span>
-                        </div>
-                    </article>
+        <section class="civilian-shell civilian-home-compact">
+            <section class="civilian-home-card">
+                <div class="civilian-home-card-copy">
+                    <p class="panel-kicker">Home</p>
+                    <h2>Simple actions only</h2>
+                    <p>Use this screen for the two things that matter most: send a new emergency report or check your report status.</p>
+                </div>
+                <div class="civilian-home-primary-actions">
+                    <a href="{{ route('reports.create') }}" class="btn btn-primary">Send Emergency Report</a>
+                    <a href="{{ route('reports.index') }}" class="btn btn-secondary">View My Reports</a>
+                </div>
+                <div class="civilian-home-mini-actions">
+                    <a href="{{ route('profile.show') }}">Profile</a>
+                    <a href="{{ route('settings.readiness') }}">Device Check</a>
                 </div>
             </section>
 
-            <section class="panel">
+            <section class="civilian-home-status-row" aria-label="Report summary">
+                <article><span>Total Reports</span><strong>{{ $stats['total'] }}</strong></article>
+                <article><span>Active</span><strong>{{ $stats['active'] }}</strong></article>
+                <article><span>Resolved</span><strong>{{ $stats['resolved'] }}</strong></article>
+            </section>
+
+            <section class="panel civilian-latest-panel">
                 <div class="panel-head">
                     <div class="panel-heading">
-                        <p class="panel-kicker">Latest Reports</p>
-                        <h2 class="panel-title">Your most recent submissions</h2>
-                        <p class="section-copy">This list is intentionally lighter than the responder queue. It keeps status, severity, location, and quick actions visible without overloading the screen.</p>
+                        <p class="panel-kicker">Latest Status</p>
+                        <h2 class="panel-title">Your latest report</h2>
                     </div>
+                    <a href="{{ route('reports.index') }}" class="btn btn-secondary">Open History</a>
                 </div>
-                <div class="civilian-history-stack">
-                    @forelse ($reports as $report)
-                        @php
-                            $progress = match ($report->status) {
-                                'resolved', 'rejected' => 100,
-                                'responding' => 82,
-                                'dispatched' => 64,
-                                'acknowledged' => 42,
-                                default => 20,
-                            };
-                            $progressClass = $report->status === 'resolved'
-                                ? 'is-complete'
-                                : ($report->status === 'rejected' ? 'is-rejected' : '');
-                            $statusSummary = match ($report->status) {
-                                'resolved' => 'Completed by responders',
-                                'rejected' => 'Reviewed and rejected',
-                                'responding' => 'Responder is on the field',
-                                'dispatched' => 'Responder unit already dispatched',
-                                'acknowledged' => 'Under responder review',
-                                default => 'Waiting in active queue',
-                            };
-                        @endphp
-                        <article class="civilian-history-card">
-                            <div class="civilian-history-top">
-                                <div class="civilian-history-meta">
-                                    <div class="tag-row">
-                                        <span class="incident-code">{{ $report->report_code }}</span>
-                                        <span class="tag {{ $tone($report->severity) }}">{{ $report->severity }}</span>
-                                        <span class="tag blue">{{ ucfirst($report->status) }}</span>
-                                    </div>
-                                    <div>
-                                        <h3 class="civilian-history-title">{{ $report->incident_type }}</h3>
-                                        <p><strong>{{ $report->location_text }}</strong> | Submitted {{ optional($report->created_at)->format('M d, Y h:i A') ?? 'Pending' }}</p>
-                                    </div>
-                                </div>
-                                <span class="tag neutral">{{ strtoupper($report->transmission_type ?: 'online') }}</span>
-                            </div>
 
-                            <p>{{ \Illuminate\Support\Str::limit($report->description, 165) }}</p>
-
-                            <div class="civilian-report-stats">
-                                <article class="civilian-stat-card">
-                                    <span>Status</span>
-                                    <strong>{{ $statusSummary }}</strong>
-                                </article>
-                                <article class="civilian-stat-card">
-                                    <span>Attachments</span>
-                                    <strong>
-                                        @if ($report->evidence_path && $report->reporter_selfie_path)
-                                            Evidence + selfie ready
-                                        @elseif ($report->evidence_path)
-                                            Evidence attached
-                                        @elseif ($report->reporter_selfie_path)
-                                            Selfie verified
-                                        @else
-                                            No media stored
-                                        @endif
-                                    </strong>
-                                </article>
-                                <article class="civilian-stat-card">
-                                    <span>Last activity</span>
-                                    <strong>{{ optional($report->status_updated_at ?? $report->created_at)->diffForHumans() ?? 'Just now' }}</strong>
-                                </article>
-                            </div>
-
-                            <div class="civilian-progress-block">
-                                <div class="tag-row" style="justify-content:space-between;align-items:center;">
-                                    <span class="incident-code">Progress</span>
-                                    <span class="tag blue">{{ $progress }}% complete</span>
-                                </div>
-                                <div class="civilian-progress-track">
-                                    <div class="civilian-progress-fill {{ $progressClass }}" style="width:{{ $progress }}%;"></div>
-                                </div>
-                            </div>
-
-                            <div class="civilian-history-actions">
-                                <a href="{{ route('reports.show', $report) }}" class="btn btn-primary">Open Details</a>
-                                <a href="{{ route('reports.severity', $report) }}" class="btn btn-secondary">AI Severity</a>
-                                <a href="{{ route('reports.transmissions', $report) }}" class="btn btn-secondary">Transmission</a>
-                            </div>
-                        </article>
-                    @empty
-                        <div class="civilian-empty-state">
-                            <strong>No reports yet</strong>
-                            <p>You have not submitted any reports yet. Start with the camera-first emergency form when you need it.</p>
-                            <a href="{{ route('reports.create') }}" class="btn btn-primary">Send My First Report</a>
+                @forelse ($reports->take(1) as $report)
+                    @php
+                        $statusSummary = match ($report->status) {
+                            'resolved' => 'Completed',
+                            'rejected' => 'Reviewed',
+                            'responding' => 'Responder on the way',
+                            'dispatched' => 'Dispatched',
+                            'acknowledged' => 'Under review',
+                            default => 'Received',
+                        };
+                    @endphp
+                    <article class="civilian-latest-card">
+                        <div>
+                            <span class="incident-code">{{ $report->report_code }}</span>
+                            <h3>{{ $report->incident_type }}</h3>
+                            <p>{{ $report->location_text }}</p>
                         </div>
-                    @endforelse
-                </div>
-            </section>
-
-            <section class="dual-grid">
-                <article class="panel">
-                    <div class="panel-head"><div class="panel-heading"><p class="panel-kicker">Severity Summary</p><h2 class="panel-title">My report severity mix</h2></div></div>
-                    <div class="summary-strip">
-                        @foreach ($severityBreakdown as $label => $count)
-                            <article class="summary-card">
-                                <span>{{ $label }}</span>
-                                <strong>{{ $count }}</strong>
-                                <p>Reports from your civilian account currently tagged with this severity.</p>
-                            </article>
-                        @endforeach
+                        <div class="tag-row">
+                            <span class="tag {{ $tone($report->severity) }}">{{ $report->severity }}</span>
+                            <span class="tag blue">{{ $statusSummary }}</span>
+                        </div>
+                        <a href="{{ route('reports.show', $report) }}" class="btn btn-primary">View Details</a>
+                    </article>
+                @empty
+                    <div class="civilian-empty-state">
+                        <strong>No reports yet</strong>
+                        <p>Tap Send Emergency Report when you need to submit one.</p>
+                        <a href="{{ route('reports.create') }}" class="btn btn-primary">Send My First Report</a>
                     </div>
-                </article>
-
-                <article class="panel">
-                    <div class="panel-head"><div class="panel-heading"><p class="panel-kicker">Transmission Summary</p><h2 class="panel-title">Online vs LoRa history</h2></div></div>
-                    <div class="summary-strip">
-                        <article class="summary-card">
-                            <span>Online reports</span>
-                            <strong>{{ $transmissionBreakdown['online'] }}</strong>
-                            <p>Full payload submissions with richer evidence and verification context.</p>
-                        </article>
-                        <article class="summary-card">
-                            <span>LoRa fallback</span>
-                            <strong>{{ $transmissionBreakdown['lora'] }}</strong>
-                            <p>Compact submissions sent when network conditions required fallback transmission.</p>
-                        </article>
-                    </div>
-                </article>
+                @endforelse
             </section>
         </section>
     @else
