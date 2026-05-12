@@ -1,0 +1,1 @@
+image_relative_path,true_label,predicted_label,correct,confidence,review_required,minor_probability,serious_probability,fatal_probability,source_domain,municipality,province,barangay,incident_type,road_type,weather,lighting_condition,vehicle_types,motorcycle_present,multi_vehicle,rural_scene,scenario_tags

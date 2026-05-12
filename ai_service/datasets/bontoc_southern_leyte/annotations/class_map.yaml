@@ -1,0 +1,9 @@
+﻿severity_labels:
+  minor: 0
+  serious: 1
+  fatal: 2
+
+source_domains:
+  road_accident: 0
+  general_accident: 1
+  emergency_scene: 2

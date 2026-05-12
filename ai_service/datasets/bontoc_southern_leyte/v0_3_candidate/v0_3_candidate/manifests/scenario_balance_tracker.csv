@@ -1,0 +1,8 @@
+scenario_name,target_minimum,current_reviewed_pool_count,current_train_count,current_val_count,current_test_count,status,notes
+motorcycle_incident,30,0,0,0,0,pending,
+night_or_low_light,20,0,0,0,0,pending,
+rain_or_wet_road,20,0,0,0,0,pending,
+rural_or_barangay_road,25,0,0,0,0,pending,
+multi_vehicle_collision,20,0,0,0,0,pending,
+tricycle_involved,10,0,0,0,0,pending,
+truck_or_heavy_vehicle,15,0,0,0,0,pending,

@@ -1,0 +1,9 @@
+scenario_name,target_minimum,current_count,status,notes
+motorcycle_incident,10,0,pending,
+night_scene,10,0,pending,
+rain_or_wet_road,10,0,pending,
+rural_or_barangay_road,15,0,pending,
+multi_vehicle_collision,10,0,pending,
+partial_view_or_obstructed_scene,8,0,pending,
+tricycle_involved,5,0,pending,
+truck_or_heavy_vehicle_involved,8,0,pending,

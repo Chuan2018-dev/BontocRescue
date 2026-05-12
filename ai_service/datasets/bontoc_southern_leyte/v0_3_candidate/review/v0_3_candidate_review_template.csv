@@ -1,0 +1,4 @@
+image_relative_path,review_status,quality_flag,duplicate_candidate,label_confidence,motorcycle_present,multi_vehicle,rural_scene,weather_flag,lighting_flag,reviewer_name,review_notes
+v0_3_candidate/reviewed_pool/minor/example_minor_0001.jpg,pending,none,no,high,yes,no,yes,clear,daylight,,
+v0_3_candidate/reviewed_pool/serious/example_serious_0001.jpg,pending,low_light,no,medium,yes,yes,no,rain,night,,
+v0_3_candidate/reviewed_pool/fatal/example_fatal_0001.jpg,pending,partial_view,no,medium,no,yes,yes,clear,low_light,,
