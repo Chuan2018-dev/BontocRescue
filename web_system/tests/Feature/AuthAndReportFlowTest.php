@@ -44,7 +44,9 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee($shortBrand)
             ->assertSee($branding)
             ->assertSee('Severity AI')
-            ->assertSee('Download App');
+            ->assertSee('Download App')
+            ->assertSee('manifest.webmanifest?v=', false)
+            ->assertSee('pwa-helper.js?v=', false);
 
         $this->get('/login')
             ->assertOk()
@@ -53,7 +55,9 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('data-auth-toggle-target="password"', false)
             ->assertSee('Minimum of 6 characters.')
             ->assertSee('Register Account')
-            ->assertSee('Download App');
+            ->assertSee('Download App')
+            ->assertSee('manifest.webmanifest?v=', false)
+            ->assertSee('pwa-helper.js?v=', false);
     }
 
     public function test_login_form_uses_https_when_served_behind_render_proxy(): void

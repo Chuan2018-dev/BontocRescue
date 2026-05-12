@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bontoc-rescue-pwa-v3';
+const CACHE_NAME = 'bontoc-rescue-pwa-v4';
 const OFFLINE_URL = '/offline.html';
 const APP_SHELL_URLS = [
     '/',
@@ -11,6 +11,18 @@ const APP_SHELL_URLS = [
     '/icons/icon-192.png',
     '/icons/icon-512.png',
 ];
+const NEVER_CACHE_PATHS = new Set([
+    '/system/version',
+    '/sw.js',
+    '/pwa-helper.js',
+    '/manifest.webmanifest',
+]);
+
+const isBuildAsset = (url) =>
+    url.pathname.startsWith('/build/')
+    || url.pathname.startsWith('/icons/');
+
+const networkFresh = (request) => fetch(request, { cache: 'no-store' });
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -46,19 +58,8 @@ self.addEventListener('fetch', (event) => {
 
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request)
-                .then((response) => {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(request, responseClone));
-                    return response;
-                })
+            networkFresh(request)
                 .catch(async () => {
-                    const cachedResponse = await caches.match(request);
-
-                    if (cachedResponse) {
-                        return cachedResponse;
-                    }
-
                     return caches.match(OFFLINE_URL);
                 })
         );
@@ -66,6 +67,19 @@ self.addEventListener('fetch', (event) => {
     }
 
     if (url.origin !== self.location.origin) {
+        return;
+    }
+
+    if (NEVER_CACHE_PATHS.has(url.pathname)) {
+        event.respondWith(networkFresh(request));
+        return;
+    }
+
+    if (!isBuildAsset(url)) {
+        event.respondWith(
+            networkFresh(request)
+                .catch(async () => caches.match(request))
+        );
         return;
     }
 

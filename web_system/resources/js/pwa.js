@@ -1,6 +1,7 @@
 const PWA_DISMISS_KEY = 'bontoc-rescue-pwa-dismissed';
 const APP_VERSION_ENDPOINT = '/system/version';
-const APP_VERSION_POLL_INTERVAL = 60000;
+const APP_VERSION_POLL_INTERVAL = 15000;
+const UPDATE_RELOAD_QUERY_KEY = 'system_update';
 let deferredInstallPrompt = null;
 let serviceWorkerRegistration = null;
 let refreshingForUpdate = false;
@@ -158,11 +159,36 @@ const clearPendingReload = () => {
     }
 };
 
-const scheduleReloadForUpdate = (delay = 1200) => {
+const clearApplicationCaches = async () => {
+    if (!('caches' in window)) {
+        return;
+    }
+
+    try {
+        const keys = await window.caches.keys();
+        await Promise.all(
+            keys
+                .filter((key) => key.startsWith('bontoc-rescue'))
+                .map((key) => window.caches.delete(key))
+        );
+    } catch (error) {
+        console.warn('Unable to clear old app caches.', error);
+    }
+};
+
+const reloadWithFreshAssets = async () => {
+    await clearApplicationCaches();
+
+    const nextUrl = new URL(window.location.href);
+    nextUrl.searchParams.set(UPDATE_RELOAD_QUERY_KEY, String(Date.now()));
+    window.location.replace(nextUrl.toString());
+};
+
+const scheduleReloadForUpdate = (delay = 800) => {
     clearPendingReload();
 
     updateReloadHandle = window.setTimeout(() => {
-        window.location.reload();
+        void reloadWithFreshAssets();
     }, delay);
 };
 
@@ -183,7 +209,7 @@ const beginAutomaticUpdate = (worker = null) => {
     refreshingForUpdate = true;
 
     const activatedWaitingWorker = activateWaitingWorker(worker);
-    scheduleReloadForUpdate(activatedWaitingWorker ? 3500 : 1200);
+    scheduleReloadForUpdate(activatedWaitingWorker ? 2500 : 800);
 };
 
 const fetchSystemVersion = async () => {
@@ -267,7 +293,10 @@ const registerServiceWorker = async () => {
     }
 
     try {
-        serviceWorkerRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        const version = activeAppVersion ?? await fetchSystemVersion();
+        activeAppVersion = activeAppVersion ?? version;
+        const workerUrl = version ? `/sw.js?v=${encodeURIComponent(version)}` : '/sw.js';
+        serviceWorkerRegistration = await navigator.serviceWorker.register(workerUrl, { scope: '/' });
 
         if (serviceWorkerRegistration.waiting) {
             beginAutomaticUpdate();
@@ -324,8 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNetworkStatus();
     setInstallCardContent();
     setUpdateCardContent();
-    void registerServiceWorker();
-    void captureCurrentAppVersion();
+    void captureCurrentAppVersion().then(() => registerServiceWorker());
     scheduleVersionPolling();
     window.setTimeout(() => {
         void checkForApplicationUpdates();
@@ -368,7 +396,7 @@ navigator.serviceWorker?.addEventListener('controllerchange', () => {
 
     clearPendingReload();
     refreshingForUpdate = false;
-    window.location.reload();
+    void reloadWithFreshAssets();
 });
 
 navigator.serviceWorker?.addEventListener('message', (event) => {
@@ -379,6 +407,12 @@ navigator.serviceWorker?.addEventListener('message', (event) => {
 
 document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
+        void checkForApplicationUpdates();
+    }
+});
+
+window.addEventListener('pageshow', (event) => {
+    if (event.persisted) {
         void checkForApplicationUpdates();
     }
 });

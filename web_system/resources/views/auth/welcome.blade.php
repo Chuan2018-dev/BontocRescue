@@ -2,8 +2,9 @@
     $html = file_get_contents(resource_path('reference_html/01_onboarding/welcome_screen/code.html'));
     $shortBrand = 'Bontoc Rescue';
     $systemName = 'AI-Powered LoRa Emergency Response and Severity Detection System with Intelligent Location Monitoring';
+    $pwaAssetVersion = app(\App\Support\SystemVersion::class)->current();
     $pwaHead = view('partials.pwa-head')->render();
-    $pwaScript = '<script src="'.asset('pwa-helper.js').'"></script>';
+    $pwaScript = '<script src="'.asset('pwa-helper.js').'?v='.$pwaAssetVersion.'"></script>';
 
     $html = str_replace(
         '<title>Vigilant Sentinel | AI-Powered Emergency Response</title>',

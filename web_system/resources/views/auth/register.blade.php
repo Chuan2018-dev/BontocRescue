@@ -3,8 +3,9 @@
     $shortBrand = 'Bontoc Rescue';
     $systemName = 'AI-Powered LoRa Emergency Response and Severity Detection System with Intelligent Location Monitoring';
     $selectedRole = old('role', 'civilian');
+    $pwaAssetVersion = app(\App\Support\SystemVersion::class)->current();
     $pwaHead = view('partials.pwa-head')->render();
-    $pwaScript = '<script src="'.asset('pwa-helper.js').'"></script>';
+    $pwaScript = '<script src="'.asset('pwa-helper.js').'?v='.$pwaAssetVersion.'"></script>';
     $authHelperScript = '<script src="'.asset('auth-password.js').'"></script>';
 
     $message = '';

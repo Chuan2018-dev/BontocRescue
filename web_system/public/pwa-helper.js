@@ -1,8 +1,14 @@
 ﻿(function () {
     const dismissedKey = 'bontoc-rescue-pwa-helper-dismissed';
+    const versionEndpoint = '/system/version';
+    const versionPollInterval = 15000;
+    const updateReloadQueryKey = 'system_update';
     let deferredPrompt = null;
     let serviceWorkerRegistration = null;
     let refreshingForUpdate = false;
+    let activeAppVersion = null;
+    let versionPollHandle = null;
+    let reloadHandle = null;
 
     const standalone = function () {
         return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
@@ -125,6 +131,70 @@
         `;
 
         document.head.appendChild(style);
+    };
+
+    const fetchSystemVersion = async function () {
+        try {
+            const response = await fetch(versionEndpoint, {
+                cache: 'no-store',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                return null;
+            }
+
+            const payload = await response.json();
+            return typeof payload?.version === 'string' ? payload.version : null;
+        } catch (error) {
+            console.warn('PWA helper version check failed.', error);
+            return null;
+        }
+    };
+
+    const clearApplicationCaches = async function () {
+        if (!('caches' in window)) {
+            return;
+        }
+
+        try {
+            const keys = await window.caches.keys();
+            await Promise.all(
+                keys
+                    .filter(function (key) {
+                        return key.indexOf('bontoc-rescue') === 0;
+                    })
+                    .map(function (key) {
+                        return window.caches.delete(key);
+                    })
+            );
+        } catch (error) {
+            console.warn('PWA helper could not clear old caches.', error);
+        }
+    };
+
+    const reloadWithFreshAssets = async function () {
+        await clearApplicationCaches();
+
+        const nextUrl = new URL(window.location.href);
+        nextUrl.searchParams.set(updateReloadQueryKey, String(Date.now()));
+        window.location.replace(nextUrl.toString());
+    };
+
+    const clearScheduledReload = function () {
+        if (reloadHandle) {
+            window.clearTimeout(reloadHandle);
+            reloadHandle = null;
+        }
+    };
+
+    const scheduleReload = function (delay) {
+        clearScheduledReload();
+        reloadHandle = window.setTimeout(function () {
+            reloadWithFreshAssets();
+        }, delay || 800);
     };
 
     const ensureHelper = function () {
@@ -294,21 +364,97 @@
 
     const showUpdateHelper = function () {
         const helper = ensureHelper();
-        helper.querySelector('[data-bontoc-pwa-title]').textContent = 'New app version available';
-        helper.querySelector('[data-bontoc-pwa-copy]').textContent = 'Refresh the app now to load the latest emergency workflow, fixes, and cached assets.';
-        helper.querySelector('[data-bontoc-pwa-install]').textContent = 'Refresh App';
+        helper.querySelector('[data-bontoc-pwa-title]').textContent = 'Applying latest app update';
+        helper.querySelector('[data-bontoc-pwa-copy]').textContent = 'The system found a newer version and will refresh automatically so the website and installed app show the latest changes.';
+        helper.querySelector('[data-bontoc-pwa-install]').textContent = 'Refresh Now';
         helper.querySelector('[data-bontoc-pwa-install]').setAttribute('data-install-mode', 'refresh');
         updateStatus();
         helper.hidden = false;
     };
 
+    const activateWaitingWorker = function (worker) {
+        const waitingWorker = worker || serviceWorkerRegistration?.waiting;
+
+        if (!waitingWorker) {
+            return false;
+        }
+
+        waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+        return true;
+    };
+
+    const beginAutomaticUpdate = function (worker) {
+        if (refreshingForUpdate) {
+            return;
+        }
+
+        showUpdateHelper();
+        refreshingForUpdate = true;
+        const activatedWaitingWorker = activateWaitingWorker(worker);
+        scheduleReload(activatedWaitingWorker ? 2500 : 800);
+    };
+
+    const requestServiceWorkerUpdate = async function () {
+        if (!serviceWorkerRegistration) {
+            return;
+        }
+
+        try {
+            await serviceWorkerRegistration.update();
+        } catch (error) {
+            console.warn('PWA helper service worker update check failed.', error);
+        }
+    };
+
+    const checkForApplicationUpdates = async function () {
+        if (refreshingForUpdate) {
+            return;
+        }
+
+        await requestServiceWorkerUpdate();
+
+        if (serviceWorkerRegistration?.waiting) {
+            beginAutomaticUpdate();
+            return;
+        }
+
+        const latestVersion = await fetchSystemVersion();
+
+        if (!latestVersion) {
+            return;
+        }
+
+        if (!activeAppVersion) {
+            activeAppVersion = latestVersion;
+            return;
+        }
+
+        if (latestVersion !== activeAppVersion) {
+            beginAutomaticUpdate();
+        }
+    };
+
+    const scheduleVersionPolling = function () {
+        if (versionPollHandle) {
+            return;
+        }
+
+        versionPollHandle = window.setInterval(function () {
+            checkForApplicationUpdates();
+        }, versionPollInterval);
+    };
+
     window.addEventListener('load', function () {
         if (supportsServiceWorker()) {
-            navigator.serviceWorker.register('/sw.js', { scope: '/' }).then(function (registration) {
+            fetchSystemVersion().then(function (version) {
+                activeAppVersion = activeAppVersion || version;
+                const workerUrl = version ? `/sw.js?v=${encodeURIComponent(version)}` : '/sw.js';
+                return navigator.serviceWorker.register(workerUrl, { scope: '/' });
+            }).then(function (registration) {
                 serviceWorkerRegistration = registration;
 
                 if (registration.waiting) {
-                    showUpdateHelper();
+                    beginAutomaticUpdate();
                 }
 
                 registration.addEventListener('updatefound', function () {
@@ -320,10 +466,15 @@
 
                     newWorker.addEventListener('statechange', function () {
                         if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                            showUpdateHelper();
+                            beginAutomaticUpdate(newWorker);
                         }
                     });
                 });
+
+                scheduleVersionPolling();
+                window.setTimeout(function () {
+                    checkForApplicationUpdates();
+                }, 3000);
             }).catch(function (error) {
                 console.warn('PWA helper service worker registration failed.', error);
             });
@@ -363,8 +514,25 @@
             return;
         }
 
+        clearScheduledReload();
         refreshingForUpdate = false;
-        window.location.reload();
+        reloadWithFreshAssets();
+    });
+
+    document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') {
+            checkForApplicationUpdates();
+        }
+    });
+
+    window.addEventListener('focus', function () {
+        checkForApplicationUpdates();
+    });
+
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            checkForApplicationUpdates();
+        }
     });
 
     window.addEventListener('online', updateStatus);
