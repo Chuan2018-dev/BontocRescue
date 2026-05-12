@@ -75,7 +75,7 @@
 @section('title', $isCivilian ? 'Civilian Dashboard' : 'Responder Dashboard')
 @section('page_label', $isCivilian ? 'Civilian Dashboard' : 'Monitoring')
 @section('page_heading', $isCivilian ? 'Civilian Home' : 'Live Incident Feed')
-@section('page_subheading', $isCivilian ? 'Simple phone-friendly access for sending emergency reports and checking your latest status.' : 'Clean, responder-friendly monitoring for live incidents, dispatch priorities, and field communication status.')
+@section('page_subheading', $isCivilian ? 'Direct access to report an emergency and check your latest status.' : 'Clean, responder-friendly monitoring for live incidents, dispatch priorities, and field communication status.')
 
 @section('hero')
     @if ($isCivilian)
@@ -83,11 +83,11 @@
             <div class="civilian-simple-hero-grid">
                 <div class="hero-copy civilian-simple-copy">
                     <p class="eyebrow">Civilian Home</p>
-                    <h2>Need help? Send a report fast.</h2>
-                    <p>Logged in as <strong>{{ $user?->name }}</strong>. This home screen keeps only the actions civilians need most.</p>
+                    <h2>Report or check status.</h2>
+                    <p>Signed in as <strong>{{ $user?->name }}</strong>. Use the main action first during an emergency.</p>
                     <div class="hero-actions civilian-simple-actions">
-                        <a href="{{ route('reports.create') }}" class="btn btn-primary">Send Emergency Report</a>
-                        <a href="{{ route('reports.index') }}" class="btn btn-secondary">Open Report History</a>
+                        <a href="{{ route('reports.create') }}" class="btn btn-primary">Report Emergency</a>
+                        <a href="{{ route('reports.index') }}" class="btn btn-secondary">My Reports</a>
                     </div>
                 </div>
                 <div class="civilian-simple-stats" aria-label="Your report summary">
@@ -129,13 +129,13 @@
         <section class="civilian-shell civilian-home-compact">
             <section class="civilian-home-card">
                 <div class="civilian-home-card-copy">
-                    <p class="panel-kicker">Home</p>
-                    <h2>Simple actions only</h2>
-                    <p>Use this screen for the two things that matter most: send a new emergency report or check your report status.</p>
+                    <p class="panel-kicker">Main actions</p>
+                    <h2>What do you need?</h2>
+                    <p>Use one clear path. Report a new emergency, or check the status of a report you already sent.</p>
                 </div>
                 <div class="civilian-home-primary-actions">
-                    <a href="{{ route('reports.create') }}" class="btn btn-primary">Send Emergency Report</a>
-                    <a href="{{ route('reports.index') }}" class="btn btn-secondary">View My Reports</a>
+                    <a href="{{ route('reports.create') }}" class="btn btn-primary">Report Emergency</a>
+                    <a href="{{ route('reports.index') }}" class="btn btn-secondary">Check Status</a>
                 </div>
                 <div class="civilian-home-mini-actions">
                     <a href="{{ route('profile.show') }}">Profile</a>

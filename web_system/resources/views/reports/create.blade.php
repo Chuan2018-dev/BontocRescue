@@ -8,17 +8,17 @@
 @section('title', $isCivilian ? 'Send Emergency Report' : 'Create Report')
 @section('page_label', $isCivilian ? 'Send Report' : 'Manual Report Entry')
 @section('page_heading', $isCivilian ? 'Civilian Emergency Report' : 'Create an Incident from the Web Dashboard')
-@section('page_subheading', $isCivilian ? 'Use four simple actions: capture photo, record video, capture selfie, and lock GPS.' : 'Use this responder-side form for manual incident entry while preserving the standard Laravel incident workflow.')
+@section('page_subheading', $isCivilian ? 'Complete the four required field actions, add a short description, then send.' : 'Use this responder-side form for manual incident entry while preserving the standard Laravel incident workflow.')
 
 @section('hero')
     @if ($isCivilian)
         <section class="hero-card civilian-report-hero">
             <div class="civilian-report-hero-grid">
                 <div class="hero-copy">
-                    <p class="eyebrow">Civilian Emergency Report</p>
-                    <h2>Four taps first, then send.</h2>
-                    <p>Capture the scene, add optional video, verify with selfie, and lock GPS. The screen stays simple for phone use.</p>
-                    <a href="#report-form" class="btn btn-primary">Start Report</a>
+                    <p class="eyebrow">Emergency Report</p>
+                    <h2>Complete 4 steps.</h2>
+                    <p>Photo, video if useful, selfie, and GPS. Keep the description short.</p>
+                    <a href="#report-form" class="btn btn-primary">Start</a>
                 </div>
                 <div class="civilian-report-quick-list" aria-label="Report actions">
                     <span>Photo</span>
@@ -60,8 +60,8 @@
         <div class="panel-head">
             <div class="panel-heading">
                 <p class="panel-kicker">{{ $isCivilian ? 'Emergency Form' : 'Incident Form' }}</p>
-                <h2 class="panel-title">{{ $isCivilian ? 'Four buttons only' : 'Emergency details' }}</h2>
-                <p class="section-copy">{{ $isCivilian ? 'Tap Capture Photo, Record Video, Capture Selfie, and Lock GPS. Add a short description before sending.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
+                <h2 class="panel-title">{{ $isCivilian ? 'Field actions' : 'Emergency details' }}</h2>
+                <p class="section-copy">{{ $isCivilian ? 'Use the four buttons, then add one short description.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
             </div>
         </div>
 
@@ -76,8 +76,8 @@
                 <div class="civilian-report-mobile-flow">
                     <section class="form-step-card civilian-capture-panel">
                         <span class="form-step-label">Emergency Report</span>
-                        <strong>Tap the four buttons below.</strong>
-                        <p class="civilian-mobile-hint">Use these in order: photo, video if needed, selfie, then GPS. The report unlocks after photo, selfie, GPS, and short description are ready.</p>
+                        <strong>Use these field actions.</strong>
+                        <p class="civilian-mobile-hint">Photo, selfie, GPS, and description are required. Video is optional but helpful.</p>
 
                         <input type="file" name="evidence_photo_capture" accept="image/*" capture="environment" hidden data-capture-photo-input>
                         <input type="file" name="evidence_video_capture" accept="video/*" capture="environment" hidden data-capture-video-input>
@@ -96,31 +96,31 @@
                             <button type="button" class="setting-card capture-action-card" data-capture-trigger="photo">
                                 <span class="capture-action-icon">01</span>
                                 <strong>Capture Photo</strong>
-                                <p>Required scene photo.</p>
+                                <p>Scene photo.</p>
                                 <span class="tag neutral" data-capture-badge="evidence">Photo pending</span>
                             </button>
                             <button type="button" class="setting-card capture-action-card" data-capture-trigger="video">
                                 <span class="capture-action-icon">02</span>
                                 <strong>Record Video</strong>
-                                <p>Optional extra evidence.</p>
+                                <p>Optional proof.</p>
                                 <span class="tag neutral" data-capture-badge="video">Optional</span>
                             </button>
                             <button type="button" class="setting-card capture-action-card" data-capture-trigger="selfie">
                                 <span class="capture-action-icon">03</span>
                                 <strong>Capture Selfie</strong>
-                                <p>Required verification.</p>
+                                <p>Verify sender.</p>
                                 <span class="tag neutral" data-capture-badge="selfie">Selfie pending</span>
                             </button>
                             <button type="button" class="setting-card capture-action-card" data-capture-trigger="gps">
                                 <span class="capture-action-icon">04</span>
                                 <strong>Lock GPS</strong>
-                                <p>Required location.</p>
+                                <p>Use location.</p>
                                 <span class="tag neutral" data-capture-badge="gps">GPS pending</span>
                             </button>
                         </div>
 
                         <div class="civilian-mobile-status-card">
-                            <p data-capture-submit-status>Complete photo, selfie, GPS, and short description first.</p>
+                            <p data-capture-submit-status>Required: photo, selfie, GPS, and short description.</p>
                             <p data-geo-status>GPS not locked yet.</p>
                             <div class="visually-hidden-control" aria-hidden="true">
                                 <span data-requirement-status="photo">Still required</span>
@@ -134,7 +134,7 @@
                         </div>
 
                         <details class="civilian-compact-details">
-                            <summary>Show selected photo and selfie preview</summary>
+                            <summary>Preview selected media</summary>
                             <div class="preview-grid">
                                 <article class="preview-card">
                                     <strong>Scene evidence preview</strong>
@@ -167,7 +167,7 @@
 
                     <section class="form-step-card civilian-description-panel">
                         <span class="form-step-label">Short Description</span>
-                        <strong>What happened?</strong>
+                        <strong>Describe the emergency.</strong>
                         <div class="field">
                             <label for="description">Short description</label>
                             <textarea id="description" class="textarea" name="description" required placeholder="Example: Motorcycle crash near the barangay road, one injured person, road partially blocked." data-required-description>{{ old('description') }}</textarea>
@@ -175,9 +175,9 @@
                     </section>
 
                     <section class="form-step-card report-submit-card civilian-send-card">
-                        <strong>Ready to send?</strong>
-                        <p>The button stays locked until photo, selfie, GPS, and description are complete.</p>
-                        <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Send Emergency Report</button>
+                        <strong>Send when complete.</strong>
+                        <p>Locked until photo, selfie, GPS, and description are ready.</p>
+                        <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Send Report</button>
                     </section>
                 </div>
             @else
