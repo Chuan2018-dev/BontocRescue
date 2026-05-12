@@ -41,6 +41,18 @@ server {
         log_not_found off;
     }
 
+    location = /manifest.webmanifest {
+        default_type application/manifest+json;
+        add_header Cache-Control "no-cache";
+        try_files /manifest.webmanifest =404;
+    }
+
+    location = /sw.js {
+        default_type application/javascript;
+        add_header Cache-Control "no-cache";
+        try_files /sw.js =404;
+    }
+
     location ~ \.php$ {
         include fastcgi_params;
         fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
