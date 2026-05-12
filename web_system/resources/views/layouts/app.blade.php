@@ -109,7 +109,8 @@
         .civilian-capture-panel{padding:18px;border-radius:20px;background:#fff;box-shadow:none}
         .civilian-mobile-hint{font-size:.95rem}
         .civilian-four-button-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-        .civilian-four-button-grid .capture-action-card{min-height:140px;align-content:space-between;border-radius:18px;padding:14px}
+        .civilian-three-button-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+        .civilian-four-button-grid .capture-action-card,.civilian-three-button-grid .capture-action-card{min-height:140px;align-content:space-between;border-radius:18px;padding:14px}
         .capture-action-icon{display:inline-flex;width:38px;height:38px;border-radius:12px;align-items:center;justify-content:center;background:rgba(255,255,255,.18);color:#fff;font-weight:900}
         .civilian-mobile-status-card{padding:12px 14px;border-radius:16px;background:var(--surface-alt);border:1px solid rgba(15,31,47,.08);display:grid;gap:6px}
         .civilian-mobile-status-card p{font-weight:800;color:var(--ink);line-height:1.5}
@@ -199,7 +200,7 @@
             .mobile-quick-nav button.is-logout span{background:rgba(199,38,38,.10);color:var(--danger)}
             .civilian-home-grid,.report-form-shell,.civilian-simple-hero-grid,.civilian-report-hero-grid{grid-template-columns:1fr}
             .civilian-simple-stats,.civilian-home-status-row,.civilian-latest-card{grid-template-columns:1fr}
-            .civilian-four-button-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .civilian-four-button-grid,.civilian-three-button-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
         }
         @media (max-width:620px){
             .ops-main{padding:14px 14px 120px}
@@ -229,8 +230,8 @@
             .civilian-report-quick-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
             .civilian-report-quick-list span{min-height:48px;padding:10px 6px;font-size:.62rem;letter-spacing:.10em}
             .civilian-capture-panel{padding:14px;border-radius:18px}
-            .civilian-four-button-grid{gap:10px}
-            .civilian-four-button-grid .capture-action-card{min-height:132px;padding:12px;border-radius:16px}
+            .civilian-four-button-grid,.civilian-three-button-grid{gap:10px}
+            .civilian-four-button-grid .capture-action-card,.civilian-three-button-grid .capture-action-card{min-height:132px;padding:12px;border-radius:16px}
             .capture-action-icon{width:36px;height:36px;border-radius:12px}
             .capture-action-card strong{font-size:.98rem}
             .capture-action-card p{font-size:.82rem;line-height:1.45}
@@ -251,6 +252,7 @@
         $pageLabel = trim($__env->yieldContent('page_label')) ?: ($isCivilian ? 'Civilian Dashboard' : 'Monitoring');
         $pageHeading = trim($__env->yieldContent('page_heading')) ?: (trim($__env->yieldContent('title')) ?: 'Operations Center');
         $pageSubheading = trim($__env->yieldContent('page_subheading')) ?: 'Live coordination, dispatch visibility, and incident intelligence.';
+        $hideTopbar = trim($__env->yieldContent('hide_topbar')) === 'true';
         $fatalAlertCount = isset($fatalAlerts) ? collect($fatalAlerts)->count() : 0;
         $compactPrimaryUrl = $authUser?->is_admin ? route('admin.dashboard') : ($isCivilian ? route('dashboard') : route('monitoring'));
         $compactPrimaryLabel = $authUser?->is_admin ? 'Admin' : ($isCivilian ? 'Home' : 'Monitor');
@@ -360,36 +362,38 @@ SVG,
         <div class="ops-main">
             <div class="live-toast-stack" data-live-toast-stack></div>
 
-            <header class="topbar">
-                <div class="topbar-copy">
-                    <p class="topbar-label">{{ $pageLabel }}</p>
-                    <h1>{{ $pageHeading }}</h1>
-                    <span>{{ $pageSubheading }}</span>
-                </div>
-                <div class="topbar-actions">
-                    <button type="button" class="pill-btn sidebar-toggle" data-sidebar-toggle>Operations Menu</button>
-                    <div class="pwa-shell-pill" data-pwa-status-pill><span data-pwa-status-label>Online Ready</span><strong data-pwa-display-mode>Browser</strong></div>
-                    @unless ($isCivilian)
-                        <button type="button" class="pill-btn" data-alert-center-toggle aria-expanded="false"><span>Active Alerts</span><strong data-alert-count>{{ $fatalAlertCount }}</strong></button>
-                        <button type="button" class="mini-chip" data-enable-live-alerts>Enable Live Alerts</button>
-                    @else
-                        <a href="{{ route('reports.create') }}" class="mini-chip"><span>Quick Action</span><strong>Send Report</strong></a>
-                    @endunless
-                    <div class="mini-chip"><span>System Time</span><strong data-system-time>{{ now()->format('Y-m-d H:i:s') }}</strong></div>
-                    @if ($authUser)
-                        <div class="identity-card">
-                            <div><strong>{{ $authUser->name }}</strong><span>{{ $roleLabel }}</span></div>
-                            <div class="avatar">
-                                @if ($authProfilePhotoUrl)
-                                    <img src="{{ $authProfilePhotoUrl }}" alt="{{ $authUser->name }} profile photo">
-                                @else
-                                    {{ $initials }}
-                                @endif
+            @unless ($hideTopbar)
+                <header class="topbar">
+                    <div class="topbar-copy">
+                        <p class="topbar-label">{{ $pageLabel }}</p>
+                        <h1>{{ $pageHeading }}</h1>
+                        <span>{{ $pageSubheading }}</span>
+                    </div>
+                    <div class="topbar-actions">
+                        <button type="button" class="pill-btn sidebar-toggle" data-sidebar-toggle>Operations Menu</button>
+                        <div class="pwa-shell-pill" data-pwa-status-pill><span data-pwa-status-label>Online Ready</span><strong data-pwa-display-mode>Browser</strong></div>
+                        @unless ($isCivilian)
+                            <button type="button" class="pill-btn" data-alert-center-toggle aria-expanded="false"><span>Active Alerts</span><strong data-alert-count>{{ $fatalAlertCount }}</strong></button>
+                            <button type="button" class="mini-chip" data-enable-live-alerts>Enable Live Alerts</button>
+                        @else
+                            <a href="{{ route('reports.create') }}" class="mini-chip"><span>Quick Action</span><strong>Send Report</strong></a>
+                        @endunless
+                        <div class="mini-chip"><span>System Time</span><strong data-system-time>{{ now()->format('Y-m-d H:i:s') }}</strong></div>
+                        @if ($authUser)
+                            <div class="identity-card">
+                                <div><strong>{{ $authUser->name }}</strong><span>{{ $roleLabel }}</span></div>
+                                <div class="avatar">
+                                    @if ($authProfilePhotoUrl)
+                                        <img src="{{ $authProfilePhotoUrl }}" alt="{{ $authUser->name }} profile photo">
+                                    @else
+                                        {{ $initials }}
+                                    @endif
+                                </div>
                             </div>
-                        </div>
-                    @endif
-                </div>
-            </header>
+                        @endif
+                    </div>
+                </header>
+            @endunless
 
             @if (isset($connectivity))
                 <section class="system-strip">

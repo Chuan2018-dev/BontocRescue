@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let evidencePreviewUrl = null;
     let selfiePreviewUrl = null;
     let evidenceInspectionToken = 0;
+    let pendingSubmitAfterSelfie = false;
 
     if (!(form instanceof HTMLFormElement)) {
         return;
@@ -314,28 +315,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const photoReady = hasRequiredPhoto();
-        const selfieReady = hasRequiredSelfie();
         const gpsReady = hasRequiredGps();
         const descriptionReady = hasRequiredDescription();
-        const allReady = photoReady && selfieReady && gpsReady && descriptionReady;
+        const selfieReady = hasRequiredSelfie();
+        const readyForSelfieGate = photoReady && gpsReady && descriptionReady;
+        const allReady = readyForSelfieGate && selfieReady;
 
         setBadgeState(photoRequirement, photoReady ? 'green' : 'red', photoReady ? 'Ready' : 'Still required');
-        setBadgeState(selfieRequirement, selfieReady ? 'green' : 'red', selfieReady ? 'Ready' : 'Still required');
+        setBadgeState(selfieRequirement, selfieReady ? 'green' : 'blue', selfieReady ? 'Ready' : 'Opens on send');
         setBadgeState(gpsRequirement, gpsReady ? 'green' : 'red', gpsReady ? 'Ready' : 'Still required');
         setBadgeState(descriptionRequirement, descriptionReady ? 'green' : 'red', descriptionReady ? 'Ready' : 'Still required');
 
         if (submitButton instanceof HTMLButtonElement) {
-            submitButton.disabled = !allReady;
-            submitButton.setAttribute('aria-disabled', allReady ? 'false' : 'true');
+            submitButton.disabled = !readyForSelfieGate;
+            submitButton.setAttribute('aria-disabled', readyForSelfieGate ? 'false' : 'true');
         }
 
         if (submitStatus) {
             submitStatus.textContent = allReady
-                ? 'All required steps are ready. You can send the emergency report now.'
-                : 'Complete the real scene photo, verification selfie, GPS lock, and short description first. Screenshots, app UI, and unrelated dummy photos are not accepted.';
+                ? 'Verification selfie is ready. Sending can continue.'
+                : readyForSelfieGate
+                    ? 'Tap Send Report to open selfie verification before final submit.'
+                    : 'Complete the real scene photo, GPS lock, and short description first. Screenshots, app UI, and unrelated dummy photos are not accepted.';
         }
 
-        return allReady;
+        return readyForSelfieGate;
+    };
+
+    const openSelfieVerification = () => {
+        pendingSubmitAfterSelfie = true;
+
+        if (submitStatus) {
+            submitStatus.textContent = 'Opening selfie verification. Capture your face clearly to submit the report.';
+        }
+
+        if (selfieCaptureInput instanceof HTMLInputElement) {
+            selfieCaptureInput.click();
+            return;
+        }
+
+        selfieInput?.click();
+    };
+
+    const submitAfterSelfieVerification = () => {
+        pendingSubmitAfterSelfie = false;
+        if (submitStatus) {
+            submitStatus.textContent = 'Selfie verified. Sending report now...';
+        }
+
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit(submitButton instanceof HTMLButtonElement ? submitButton : undefined);
+            return;
+        }
+
+        if (submitButton instanceof HTMLButtonElement) {
+            submitButton.click();
+            return;
+        }
+
+        form.submit();
     };
 
     const updateEvidencePreview = (file) => {
@@ -552,6 +590,10 @@ document.addEventListener('DOMContentLoaded', () => {
     selfieCaptureInput?.addEventListener('change', () => {
         clearInputFile(selfieInput);
         updateSelfiePreview(getActiveSelfieFile());
+
+        if (pendingSubmitAfterSelfie && hasRequiredSelfie()) {
+            submitAfterSelfieVerification();
+        }
     });
 
     evidenceInput?.addEventListener('change', () => {
@@ -564,6 +606,10 @@ document.addEventListener('DOMContentLoaded', () => {
     selfieInput?.addEventListener('change', () => {
         clearInputFile(selfieCaptureInput);
         updateSelfiePreview(getActiveSelfieFile());
+
+        if (pendingSubmitAfterSelfie && hasRequiredSelfie()) {
+            submitAfterSelfieVerification();
+        }
     });
 
     updateEvidencePreview(getActiveEvidenceFile());
@@ -587,9 +633,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     form.addEventListener('submit', (event) => {
-        if (isCivilian && !updateCivilianReadiness()) {
+        if (!isCivilian) {
+            return;
+        }
+
+        if (!updateCivilianReadiness()) {
             event.preventDefault();
-            setGeoStatus('Complete the required capture steps before sending the emergency report.');
+            setGeoStatus('Complete the scene photo, GPS lock, and short description before sending.');
+            return;
+        }
+
+        if (!hasRequiredSelfie()) {
+            event.preventDefault();
+            openSelfieVerification();
         }
     });
 

@@ -8,27 +8,11 @@
 @section('title', $isCivilian ? 'Send Emergency Report' : 'Create Report')
 @section('page_label', $isCivilian ? 'Send Report' : 'Manual Report Entry')
 @section('page_heading', $isCivilian ? 'Civilian Emergency Report' : 'Create an Incident from the Web Dashboard')
-@section('page_subheading', $isCivilian ? 'Complete the four required field actions, add a short description, then send.' : 'Use this responder-side form for manual incident entry while preserving the standard Laravel incident workflow.')
+@section('page_subheading', $isCivilian ? 'Capture photo, lock GPS, add a short description, then verify your selfie when sending.' : 'Use this responder-side form for manual incident entry while preserving the standard Laravel incident workflow.')
+@section('hide_topbar', $isCivilian ? 'true' : 'false')
 
 @section('hero')
-    @if ($isCivilian)
-        <section class="hero-card civilian-report-hero">
-            <div class="civilian-report-hero-grid">
-                <div class="hero-copy">
-                    <p class="eyebrow">Emergency Report</p>
-                    <h2>Complete 4 steps.</h2>
-                    <p>Photo, video if useful, selfie, and GPS. Keep the description short.</p>
-                    <a href="#report-form" class="btn btn-primary">Start</a>
-                </div>
-                <div class="civilian-report-quick-list" aria-label="Report actions">
-                    <span>Photo</span>
-                    <span>Video</span>
-                    <span>Selfie</span>
-                    <span>GPS</span>
-                </div>
-            </div>
-        </section>
-    @else
+    @unless ($isCivilian)
         <section class="hero-card">
             <div class="hero-grid">
                 <div class="hero-copy">
@@ -52,7 +36,7 @@
                 </div>
             </div>
         </section>
-    @endif
+    @endunless
 @endsection
 
 @section('content')
@@ -61,7 +45,7 @@
             <div class="panel-heading">
                 <p class="panel-kicker">{{ $isCivilian ? 'Emergency Form' : 'Incident Form' }}</p>
                 <h2 class="panel-title">{{ $isCivilian ? 'Field actions' : 'Emergency details' }}</h2>
-                <p class="section-copy">{{ $isCivilian ? 'Use the four buttons, then add one short description.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
+                <p class="section-copy">{{ $isCivilian ? 'Use photo, optional video, and GPS first. Selfie verification opens when you tap Send Report.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
             </div>
         </div>
 
@@ -77,7 +61,7 @@
                     <section class="form-step-card civilian-capture-panel">
                         <span class="form-step-label">Emergency Report</span>
                         <strong>Use these field actions.</strong>
-                        <p class="civilian-mobile-hint">Photo, selfie, GPS, and description are required. Video is optional but helpful.</p>
+                        <p class="civilian-mobile-hint">Photo, GPS, and description are required first. Video is optional. Selfie verification opens after Send Report.</p>
 
                         <input type="file" name="evidence_photo_capture" accept="image/*" capture="environment" hidden data-capture-photo-input>
                         <input type="file" name="evidence_video_capture" accept="video/*" capture="environment" hidden data-capture-video-input>
@@ -92,7 +76,7 @@
                         <input id="longitude" type="hidden" name="longitude" value="{{ old('longitude') }}" data-geo-longitude>
                         <button type="button" class="visually-hidden-control" data-geo-fill-button>Get Current Latitude and Longitude</button>
 
-                        <div class="capture-action-grid civilian-four-button-grid">
+                        <div class="capture-action-grid civilian-three-button-grid">
                             <button type="button" class="setting-card capture-action-card" data-capture-trigger="photo">
                                 <span class="capture-action-icon">01</span>
                                 <strong>Capture Photo</strong>
@@ -105,14 +89,8 @@
                                 <p>Optional proof.</p>
                                 <span class="tag neutral" data-capture-badge="video">Optional</span>
                             </button>
-                            <button type="button" class="setting-card capture-action-card" data-capture-trigger="selfie">
-                                <span class="capture-action-icon">03</span>
-                                <strong>Capture Selfie</strong>
-                                <p>Verify sender.</p>
-                                <span class="tag neutral" data-capture-badge="selfie">Selfie pending</span>
-                            </button>
                             <button type="button" class="setting-card capture-action-card" data-capture-trigger="gps">
-                                <span class="capture-action-icon">04</span>
+                                <span class="capture-action-icon">03</span>
                                 <strong>Lock GPS</strong>
                                 <p>Use location.</p>
                                 <span class="tag neutral" data-capture-badge="gps">GPS pending</span>
@@ -120,11 +98,11 @@
                         </div>
 
                         <div class="civilian-mobile-status-card">
-                            <p data-capture-submit-status>Required: photo, selfie, GPS, and short description.</p>
+                            <p data-capture-submit-status>Required first: photo, GPS, and short description.</p>
                             <p data-geo-status>GPS not locked yet.</p>
                             <div class="visually-hidden-control" aria-hidden="true">
                                 <span data-requirement-status="photo">Still required</span>
-                                <span data-requirement-status="selfie">Still required</span>
+                                <span data-requirement-status="selfie">Selfie opens on send</span>
                                 <span data-requirement-status="gps">Still required</span>
                                 <span data-requirement-status="description">Still required</span>
                                 <span data-draft-queue-count>0 queued</span>
@@ -176,7 +154,7 @@
 
                     <section class="form-step-card report-submit-card civilian-send-card">
                         <strong>Send when complete.</strong>
-                        <p>Locked until photo, selfie, GPS, and description are ready.</p>
+                        <p>Tap Send Report after photo, GPS, and description. The phone will ask for a verification selfie before final submit.</p>
                         <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Send Report</button>
                     </section>
                 </div>
