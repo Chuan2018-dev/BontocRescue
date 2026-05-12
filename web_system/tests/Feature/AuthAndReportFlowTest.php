@@ -262,7 +262,7 @@ class AuthAndReportFlowTest extends TestCase
             ->assertOk()
             ->assertSee('Civilian Profile')
             ->assertSee('History of Report')
-            ->assertSee('Update your information')
+            ->assertSee('Update Profile')
             ->assertSee('Change profile picture')
             ->assertSee('Auto-crop and resize')
             ->assertSee('Auto-crop target: 512 x 512 pixels.')

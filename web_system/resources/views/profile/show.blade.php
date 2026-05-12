@@ -21,23 +21,23 @@
 @section('title', $profileTitle)
 @section('page_label', $profileTitle)
 @section('page_heading', $profileTitle)
-@section('page_subheading', $isCivilian ? 'Edit and update your information, manage your profile picture, and review the report activity tied to your civilian account.' : 'Update your responder information, manage your profile picture, and review your current account activity.')
+@section('page_subheading', $isCivilian ? 'Update your name, contact number, photo, and password in one place.' : 'Update responder details, profile photo, and account security in one place.')
 
 @section('hero')
-    <section class="hero-card" style="{{ $isCivilian ? 'background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(232,244,255,.95));border-color:rgba(32,104,174,.16);' : '' }}">
+    <section class="hero-card" style="{{ $isCivilian ? 'background:rgba(255,255,255,.96);border-color:rgba(15,31,47,.10);' : '' }}">
         <div class="hero-grid">
             <div class="hero-copy">
                 <p class="eyebrow">{{ $isCivilian ? 'Account Identity' : 'Responder Identity' }}</p>
-                <h2>{{ $isCivilian ? 'Keep your civilian profile updated and easy to verify.' : 'Keep your responder account details current and deployment-ready.' }}</h2>
+                <h2>{{ $isCivilian ? 'Keep your account clear.' : 'Keep your responder profile ready.' }}</h2>
                 <p>
                     @if ($isCivilian)
-                        Your profile helps responders identify your reports, contact information, and verification details quickly. You can edit and update your information here and change your profile picture anytime.
+                        Keep only the important details updated so responders can identify your report and contact you fast.
                     @else
-                        Use this page to keep your responder information updated, including contact data, profile picture, and quick account details for coordination visibility.
+                        Keep your contact details, station, photo, and password current for easier coordination.
                     @endif
                 </p>
                 <div class="hero-actions">
-                    <a href="#profile-form" class="btn btn-primary">Update your information</a>
+                    <a href="#profile-form" class="btn btn-primary">Update Profile</a>
                     <a href="{{ route('reports.index') }}" class="btn btn-secondary">History of Report</a>
                 </div>
             </div>
@@ -50,13 +50,12 @@
                         <article class="metric-card"><span>Callsign</span><strong>{{ $callsign }}</strong><p>{{ $stationLabel }}</p></article>
                     </div>
                     <article class="civilian-hero-callout">
-                        <p class="eyebrow" style="color:rgba(255,255,255,.72);">Profile Readiness</p>
-                        <h3>Keep your account easy to verify.</h3>
+                        <p class="eyebrow">Profile Readiness</p>
+                        <h3>Before sending reports</h3>
                         <ul>
-                            <li>Use a clear profile photo from your phone camera.</li>
-                            <li>Keep your contact number updated.</li>
-                            <li>Save an emergency contact before you need it.</li>
-                            <li>Open your History of Report anytime to track submissions.</li>
+                            <li>Use a clear profile photo.</li>
+                            <li>Keep your phone number updated.</li>
+                            <li>Add one emergency contact.</li>
                         </ul>
                     </article>
                 </div>
@@ -77,24 +76,24 @@
         <section class="civilian-shell">
             <section class="summary-strip">
                 <a href="#profile-form" class="summary-card">
-                    <span>Update</span>
-                    <strong>My Details</strong>
-                    <p>Edit your name, email, and contact information.</p>
+                    <span>Details</span>
+                    <strong>Account</strong>
+                    <p>Name, email, and phone number.</p>
                 </a>
                 <a href="#profile-form" class="summary-card">
                     <span>Photo</span>
-                    <strong>Profile Picture</strong>
-                    <p>Upload or capture a cleaner profile photo from your phone.</p>
+                    <strong>Picture</strong>
+                    <p>Upload or capture a clear photo.</p>
                 </a>
                 <a href="{{ route('reports.index') }}" class="summary-card">
                     <span>Reports</span>
                     <strong>History</strong>
-                    <p>Review your recent reports without leaving the account page.</p>
+                    <p>Check report status updates.</p>
                 </a>
                 <a href="{{ route('settings.index') }}" class="summary-card">
                     <span>Settings</span>
                     <strong>Preferences</strong>
-                    <p>Jump to notifications, readiness, and local device settings.</p>
+                    <p>Alerts, device check, and display.</p>
                 </a>
             </section>
 
@@ -104,7 +103,7 @@
                         <div class="panel-heading">
                             <p class="panel-kicker">Profile Snapshot</p>
                             <h2 class="panel-title">Account overview</h2>
-                            <p class="section-copy">Your main account information stays in one clean block so it is easy to review on a phone before you edit anything.</p>
+                            <p class="section-copy">Quickly check your saved identity before changing anything.</p>
                         </div>
                     </div>
                     <div class="stack">
@@ -126,13 +125,13 @@
                         <div class="civilian-action-grid">
                             <a href="#profile-form" class="civilian-action-card primary">
                                 <span class="civilian-kicker">Action 01</span>
-                                <strong>Update your information</strong>
-                                <p>Jump directly to the form to change your profile details now.</p>
+                                <strong>Update Profile</strong>
+                                <p>Edit your account details now.</p>
                             </a>
                             <a href="{{ route('reports.index') }}" class="civilian-action-card">
                                 <span class="civilian-kicker">Action 02</span>
                                 <strong>History of Report</strong>
-                                <p>Open your submitted reports, status changes, and transmission updates.</p>
+                                <p>Open your submitted reports.</p>
                             </a>
                         </div>
                     </div>
@@ -162,7 +161,7 @@
                     </article>
 
                     <article class="civilian-helper-card">
-                        <strong>Latest activity</strong>
+                        <strong>Last report</strong>
                         @if ($latestReport)
                             <div class="tag-row">
                                 <span class="tag {{ $latestReport->severity === 'Fatal' ? 'red' : ($latestReport->severity === 'Serious' ? 'amber' : 'green') }}">{{ $latestReport->severity }}</span>
@@ -181,8 +180,8 @@
                 <div class="panel-head">
                     <div class="panel-heading">
                         <p class="panel-kicker">Recent Activity</p>
-                        <h2 class="panel-title">Latest report movement</h2>
-                        <p class="section-copy">This keeps your recent civilian activity visible without making the profile page feel crowded.</p>
+                        <h2 class="panel-title">Report history preview</h2>
+                        <p class="section-copy">A short list of your latest report updates.</p>
                     </div>
                 </div>
                 <div class="civilian-history-stack">
@@ -259,8 +258,8 @@
             <div class="panel-head">
                 <div class="panel-heading">
                     <p class="panel-kicker">Edit Profile</p>
-                    <h2 class="panel-title">Update your information</h2>
-                    <p class="section-copy">Change your name, email, contact details, emergency contact, and profile picture from one place.</p>
+                    <h2 class="panel-title">Update Profile</h2>
+                    <p class="section-copy">Change only what needs updating.</p>
                 </div>
             </div>
 
@@ -270,7 +269,7 @@
 
                 <div class="capture-helper-grid">
                     <div class="form-step-card">
-                        <span class="form-step-label">Step 1 - Identity</span>
+                        <span class="form-step-label">Identity</span>
                         <strong>Identity details</strong>
                         <div class="form-grid">
                             <div class="field">
@@ -289,8 +288,8 @@
                     </div>
 
                     <div class="form-step-card">
-                        <span class="form-step-label">Step 2 - Contacts</span>
-                        <strong>Contact and emergency details</strong>
+                        <span class="form-step-label">Contacts</span>
+                        <strong>Contact details</strong>
                         <div class="form-grid">
                             <div class="field">
                                 <label for="phone">Contact number</label>
@@ -309,9 +308,9 @@
                 </div>
 
                 <div class="form-step-card">
-                    <span class="form-step-label">Step 3 - Photo</span>
+                    <span class="form-step-label">Photo</span>
                     <strong>Change profile picture</strong>
-                    <p>Upload a new profile picture to make your account easier to recognize. Accepted formats: JPG, PNG, and WEBP up to 4 MB. New uploads are automatically center-cropped and resized into a clean square before you save.</p>
+                    <p>Upload or capture a clear profile photo. JPG, PNG, and WEBP are accepted up to 4 MB.</p>
                     <div class="preview-grid profile-photo-grid">
                         <div class="detail-card" style="justify-items:center;text-align:center;">
                             <strong>Live photo preview</strong>
@@ -358,9 +357,9 @@
                 </div>
 
                 <div class="form-step-card">
-                    <span class="form-step-label">Step 4 - Security</span>
+                    <span class="form-step-label">Security</span>
                     <strong>Change password</strong>
-                    <p>Use this separate section only if you want to update your password. Leave both fields blank if you do not want to change it right now. Minimum password length is 6 characters.</p>
+                    <p>Leave both fields blank if you do not want to change your password. Minimum length is 6 characters.</p>
                     <div class="button-row">
                         <button type="button" class="btn btn-secondary" data-password-toggle>Show passwords</button>
                     </div>

@@ -8,43 +8,43 @@
 @section('title', 'System Settings')
 @section('page_label', 'System Settings')
 @section('page_heading', 'System Settings')
-@section('page_subheading', $isCivilian ? 'Manage your notification preferences, fallback connectivity behavior, and local appearance settings from one simple page.' : 'Manage notifications, fallback connectivity behavior, and local dashboard appearance without leaving the command workspace.')
+@section('page_subheading', $isCivilian ? 'Set alerts, fallback mode, and device display from one simple page.' : 'Set alerts, fallback mode, and dashboard display from one simple page.')
 
 @section('hero')
-    <section class="hero-card" style="background:linear-gradient(135deg,rgba(255,255,255,.96),rgba(240,246,252,.96));border-color:rgba(32,104,174,.14);">
+    <section class="hero-card" style="background:rgba(255,255,255,.96);border-color:rgba(15,31,47,.10);">
         <div class="hero-grid">
             <div class="hero-copy">
                 <p class="eyebrow">Settings Center</p>
-                <h2>Simple controls for alerts, connectivity fallback, and local dashboard preferences.</h2>
+                <h2>Settings that matter.</h2>
                 <p>
-                    Adjust how this account receives critical updates, how the system behaves during weak connectivity,
-                    and how the interface looks on this device. Changes to notifications and connectivity save automatically.
+                    Choose how this account receives alerts, handles weak signal, and displays on this device.
+                    Alert and connectivity changes save automatically.
                 </p>
                 <div class="hero-actions">
-                    <a href="{{ $isCivilian ? route('dashboard') : route('monitoring') }}" class="btn btn-primary">{{ $isCivilian ? 'Back To Dashboard' : 'Back To Monitoring' }}</a>
-                    <a href="{{ route('profile.show') }}" class="btn btn-secondary">Open Profile</a>
+                    <a href="{{ $isCivilian ? route('dashboard') : route('monitoring') }}" class="btn btn-primary">{{ $isCivilian ? 'Home' : 'Monitoring' }}</a>
+                    <a href="{{ route('profile.show') }}" class="btn btn-secondary">Profile</a>
                 </div>
             </div>
             <div class="hero-metrics">
                 <article class="metric-card">
                     <span>Critical alerts</span>
                     <strong>{{ $settings['critical_alerts'] ? 'On' : 'Off' }}</strong>
-                    <p>Highest priority warnings for severe incidents and urgent system notices.</p>
+                    <p>Urgent incident warnings.</p>
                 </article>
                 <article class="metric-card">
                     <span>Push notifications</span>
                     <strong>{{ $settings['push_notifications'] ? 'On' : 'Off' }}</strong>
-                    <p>Browser or device notifications for regular updates and account activity.</p>
+                    <p>Browser or device alerts.</p>
                 </article>
                 <article class="metric-card">
                     <span>SMS backup</span>
                     <strong>{{ $settings['sms_backup'] ? 'On' : 'Off' }}</strong>
-                    <p>Fallback notification path when internet delivery is unreliable.</p>
+                    <p>Backup alert path.</p>
                 </article>
                 <article class="metric-card">
                     <span>Connectivity mode</span>
                     <strong>{{ $settings['connectivity_mode'] === 'lora_fallback' ? 'LoRa' : 'Auto' }}</strong>
-                    <p>{{ $settings['connectivity_mode'] === 'lora_fallback' ? 'Prefer fallback support when signal quality drops.' : 'Automatically choose the best available route.' }}</p>
+                    <p>{{ $settings['connectivity_mode'] === 'lora_fallback' ? 'Prefer fallback when signal drops.' : 'Choose the best available route.' }}</p>
                 </article>
             </div>
         </div>
@@ -58,7 +58,7 @@
                 <div class="panel-heading">
                     <p class="panel-kicker">Notifications</p>
                     <h2 class="panel-title">Alert preferences</h2>
-                    <p class="section-copy">Turn each notification channel on or off depending on how you want to receive updates.</p>
+                    <p class="section-copy">Turn alert channels on or off.</p>
                 </div>
             </div>
 
@@ -66,7 +66,7 @@
                 <div class="toggle-item">
                     <div class="toggle-copy">
                         <strong>Critical alerts</strong>
-                        <p>Receive urgent warnings for fatal incidents, immediate dispatch changes, and high-priority system events.</p>
+                        <p>For fatal incidents and urgent system notices.</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" data-setting-input="critical_alerts" @checked($settings['critical_alerts'])>
@@ -77,7 +77,7 @@
                 <div class="toggle-item">
                     <div class="toggle-copy">
                         <strong>Push notifications</strong>
-                        <p>Allow this device or browser to show routine incident updates and activity reminders.</p>
+                        <p>Show updates on this browser or device.</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" data-setting-input="push_notifications" @checked($settings['push_notifications'])>
@@ -88,7 +88,7 @@
                 <div class="toggle-item">
                     <div class="toggle-copy">
                         <strong>SMS backup</strong>
-                        <p>Use SMS as a backup notification path when normal connectivity becomes unstable.</p>
+                        <p>Use SMS when internet alerts are unreliable.</p>
                     </div>
                     <label class="switch">
                         <input type="checkbox" data-setting-input="sms_backup" @checked($settings['sms_backup'])>
@@ -104,20 +104,20 @@
                     <div class="panel-heading">
                         <p class="panel-kicker">Connectivity</p>
                         <h2 class="panel-title">Fallback behavior</h2>
-                        <p class="section-copy">Choose whether the account should stay on automatic routing or prefer LoRa fallback mode.</p>
+                        <p class="section-copy">Choose automatic routing or LoRa fallback.</p>
                     </div>
                 </div>
 
                 <div class="settings-grid">
                     <button type="button" class="setting-card" data-connectivity-mode="auto_select" aria-pressed="{{ $settings['connectivity_mode'] === 'auto_select' ? 'true' : 'false' }}">
                         <strong>Auto Select</strong>
-                        <p>Use the best available path and switch automatically when signal conditions change.</p>
+                        <p>Use the best available path.</p>
                         <span class="tag {{ $settings['connectivity_mode'] === 'auto_select' ? 'blue' : 'neutral' }}">Recommended</span>
                     </button>
 
                     <button type="button" class="setting-card" data-connectivity-mode="lora_fallback" aria-pressed="{{ $settings['connectivity_mode'] === 'lora_fallback' ? 'true' : 'false' }}">
                         <strong>LoRa Fallback</strong>
-                        <p>Prefer fallback-ready behavior for areas with weak internet or unstable uplink quality.</p>
+                        <p>Prefer fallback behavior for weak internet.</p>
                         <span class="tag {{ $settings['connectivity_mode'] === 'lora_fallback' ? 'green' : 'neutral' }}">Fallback Ready</span>
                     </button>
                 </div>
@@ -133,18 +133,18 @@
                     <div class="panel-heading">
                         <p class="panel-kicker">Appearance</p>
                         <h2 class="panel-title">Local display mode</h2>
-                        <p class="section-copy">This setting only affects the current browser or device.</p>
+                        <p class="section-copy">Only affects this browser or device.</p>
                     </div>
                 </div>
 
                 <div class="settings-grid">
                     <button type="button" class="setting-card" data-theme-choice="light">
                         <strong>Light Mode</strong>
-                        <p>Bright command workspace with clear cards and soft contrast.</p>
+                        <p>Clear cards and bright display.</p>
                     </button>
                     <button type="button" class="setting-card" data-theme-choice="dark">
                         <strong>Dark Mode</strong>
-                        <p>Darker interface for lower glare during extended monitoring sessions.</p>
+                        <p>Lower glare for long use.</p>
                     </button>
                 </div>
             </article>
@@ -169,7 +169,7 @@
             <div class="panel-head">
                 <div class="panel-heading">
                     <p class="panel-kicker">Current Setup</p>
-                    <h2 class="panel-title">Account preference summary</h2>
+                    <h2 class="panel-title">Preference summary</h2>
                 </div>
             </div>
             <div class="meta-list">
@@ -184,25 +184,25 @@
             <div class="panel-head">
                 <div class="panel-heading">
                     <p class="panel-kicker">Quick Links</p>
-                    <h2 class="panel-title">Next places you may need</h2>
+                    <h2 class="panel-title">Useful links</h2>
                 </div>
             </div>
             <div class="stack">
                 <a href="{{ $isCivilian ? route('dashboard') : route('monitoring') }}" class="detail-card">
                     <strong>{{ $isCivilian ? 'Dashboard' : 'Monitoring' }}</strong>
-                    <p>{{ $isCivilian ? 'Return to civilian reporting and history.' : 'Return to live incident monitoring.' }}</p>
+                    <p>{{ $isCivilian ? 'Return to report and status.' : 'Return to live incident monitoring.' }}</p>
                 </a>
                 <a href="{{ route('reports.index') }}" class="detail-card">
-                    <strong>Incident Feed</strong>
-                    <p>Open the full report queue, status updates, and evidence review workspace.</p>
+                    <strong>{{ $isCivilian ? 'My Reports' : 'Incident Feed' }}</strong>
+                    <p>{{ $isCivilian ? 'Open your report history.' : 'Open the full report queue.' }}</p>
                 </a>
                 <a href="{{ route('settings.readiness') }}" class="detail-card">
                     <strong>Permission Readiness Check</strong>
-                    <p>Verify camera, GPS, notifications, and online or offline state on this device before field use.</p>
+                    <p>Check camera, GPS, notifications, and connection.</p>
                 </a>
                 <a href="{{ route('profile.show') }}" class="detail-card">
-                    <strong>Responder Profile</strong>
-                    <p>Update your account details, contact info, and profile photo.</p>
+                    <strong>{{ $isCivilian ? 'Profile' : 'Responder Profile' }}</strong>
+                    <p>Update account details and profile photo.</p>
                 </a>
             </div>
         </article>
