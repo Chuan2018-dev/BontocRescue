@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: stitch-web
+    name: stitch-web-demo
     runtime: docker
     dockerfilePath: ./web_system/deploy/render/Dockerfile
     dockerContext: ./web_system
@@ -61,18 +61,10 @@ services:
         value: "false"
       - key: AI_SEVERITY_ENABLED
         value: "true"
-      - key: AI_SEVERITY_SERVICE_HOST
-        fromService:
-          type: pserv
-          name: stitch-ai
-          property: host
-      - key: AI_SEVERITY_SERVICE_PORT
-        fromService:
-          type: pserv
-          name: stitch-ai
-          property: port
+      - key: AI_SEVERITY_SERVICE_URL
+        value: https://stitch-ai-demo.onrender.com
       - key: AI_SEVERITY_TIMEOUT
-        value: "20"
+        value: "60"
       - key: AI_SEVERITY_DISPATCH
         value: sync
       - key: AI_SEVERITY_MODEL_NAME
@@ -112,14 +104,15 @@ services:
       - key: ROUTING_SERVICE_PROVIDER
         value: OSRM Public Routing
 
-  - type: pserv
-    name: stitch-ai
+  - type: web
+    name: stitch-ai-demo
     runtime: docker
     dockerfilePath: ./ai_service/deploy/render/Dockerfile
     dockerContext: ./ai_service
     region: singapore
-    plan: starter
+    plan: free
     autoDeployTrigger: commit
+    healthCheckPath: /health
     envVars:
       - key: AI_SERVICE_HOST
         value: 0.0.0.0

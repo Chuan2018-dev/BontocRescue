@@ -17,20 +17,43 @@ app = FastAPI(title="Stitch AI Severity Service", version="0.3.0")
 try:
     CONFIG = load_config(CONFIG_PATH)
     CHECKPOINT_EXISTS = is_usable_checkpoint(CONFIG.outputs.best_checkpoint_path)
-    PREDICTOR = SeverityPredictor(CONFIG) if CHECKPOINT_EXISTS else None
 except Exception:
     CONFIG = None
     CHECKPOINT_EXISTS = False
-    PREDICTOR = None
 
 try:
     RELEVANCE_CONFIG = load_config(RELEVANCE_CONFIG_PATH)
     RELEVANCE_CHECKPOINT_EXISTS = is_usable_checkpoint(RELEVANCE_CONFIG.outputs.best_checkpoint_path)
-    RELEVANCE_PREDICTOR = PhotoRelevancePredictor(RELEVANCE_CONFIG) if RELEVANCE_CHECKPOINT_EXISTS else None
 except Exception:
     RELEVANCE_CONFIG = None
     RELEVANCE_CHECKPOINT_EXISTS = False
-    RELEVANCE_PREDICTOR = None
+
+PREDICTOR: SeverityPredictor | None = None
+RELEVANCE_PREDICTOR: PhotoRelevancePredictor | None = None
+
+
+def severity_predictor() -> SeverityPredictor:
+    global PREDICTOR
+
+    if CONFIG is None or not CHECKPOINT_EXISTS:
+        raise HTTPException(status_code=503, detail="Model checkpoint not available yet. Train or sync the model first.")
+
+    if PREDICTOR is None:
+        PREDICTOR = SeverityPredictor(CONFIG)
+
+    return PREDICTOR
+
+
+def relevance_predictor() -> PhotoRelevancePredictor | None:
+    global RELEVANCE_PREDICTOR
+
+    if RELEVANCE_CONFIG is None or not RELEVANCE_CHECKPOINT_EXISTS:
+        return None
+
+    if RELEVANCE_PREDICTOR is None:
+        RELEVANCE_PREDICTOR = PhotoRelevancePredictor(RELEVANCE_CONFIG)
+
+    return RELEVANCE_PREDICTOR
 
 
 @app.get("/health")
@@ -47,21 +70,23 @@ def health() -> dict[str, object]:
         "photo_relevance_config_path": str(RELEVANCE_CONFIG.config_path) if RELEVANCE_CONFIG is not None else None,
         "photo_relevance_experiment_name": RELEVANCE_CONFIG.experiment.name if RELEVANCE_CONFIG is not None else None,
         "photo_relevance_checkpoint_path": str(RELEVANCE_CONFIG.outputs.best_checkpoint_path) if RELEVANCE_CONFIG is not None else None,
+        "severity_predictor_loaded": PREDICTOR is not None,
+        "photo_relevance_predictor_loaded": RELEVANCE_PREDICTOR is not None,
         "message": "Upload a checkpoint before using /predict." if not CHECKPOINT_EXISTS else "Prediction service ready.",
     }
 
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)) -> dict[str, object]:
-    if PREDICTOR is None:
-        raise HTTPException(status_code=503, detail="Model checkpoint not available yet. Train the model first.")
+    predictor = severity_predictor()
 
     file_bytes = await file.read()
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
-    if RELEVANCE_PREDICTOR is not None:
-        relevance = RELEVANCE_PREDICTOR.predict_bytes(file_bytes)
+    photo_gate = relevance_predictor()
+    if photo_gate is not None:
+        relevance = photo_gate.predict_bytes(file_bytes)
         if not relevance.accepted:
             return {
                 "filename": file.filename,
@@ -79,7 +104,7 @@ async def predict(file: UploadFile = File(...)) -> dict[str, object]:
     else:
         relevance = None
 
-    prediction = PREDICTOR.predict_bytes(file_bytes)
+    prediction = predictor.predict_bytes(file_bytes)
     return {
         "filename": file.filename,
         "accepted": True,
