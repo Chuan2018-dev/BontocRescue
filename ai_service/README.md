@@ -239,6 +239,25 @@ This saves:
 - checkpoint files to `artifacts/checkpoints/`
 - metrics reports to `artifacts/reports/`
 
+## Hosted Checkpoint Sync
+
+Online deployments can load trained `.pt` files at startup using env-provided URLs. This is useful for Render because AI checkpoints are large runtime artifacts.
+
+See the repo-level guide:
+
+```text
+../AI_CHECKPOINT_SYNC_GUIDE.md
+```
+
+Key env variables:
+
+- `AI_SEVERITY_CHECKPOINT_URL`
+- `AI_SEVERITY_CHECKPOINT_SHA256`
+- `AI_PHOTO_RELEVANCE_CHECKPOINT_URL`
+- `AI_PHOTO_RELEVANCE_CHECKPOINT_SHA256`
+
+If the two active checkpoints are already included in the Docker image for a temporary demo build, these URL env variables can stay blank.
+
 ## Local Validation Evaluator
 
 Use this after filling the local validation manifest:

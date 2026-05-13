@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
+from .checkpoint_sync import is_usable_checkpoint
 from .config import load_config
 from .defaults import resolve_active_config_path, resolve_photo_relevance_config_path
 from .inference import PhotoRelevancePredictor, SeverityPredictor
@@ -15,7 +16,7 @@ app = FastAPI(title="Stitch AI Severity Service", version="0.3.0")
 
 try:
     CONFIG = load_config(CONFIG_PATH)
-    CHECKPOINT_EXISTS = CONFIG.outputs.best_checkpoint_path.exists()
+    CHECKPOINT_EXISTS = is_usable_checkpoint(CONFIG.outputs.best_checkpoint_path)
     PREDICTOR = SeverityPredictor(CONFIG) if CHECKPOINT_EXISTS else None
 except Exception:
     CONFIG = None
@@ -24,7 +25,7 @@ except Exception:
 
 try:
     RELEVANCE_CONFIG = load_config(RELEVANCE_CONFIG_PATH)
-    RELEVANCE_CHECKPOINT_EXISTS = RELEVANCE_CONFIG.outputs.best_checkpoint_path.exists()
+    RELEVANCE_CHECKPOINT_EXISTS = is_usable_checkpoint(RELEVANCE_CONFIG.outputs.best_checkpoint_path)
     RELEVANCE_PREDICTOR = PhotoRelevancePredictor(RELEVANCE_CONFIG) if RELEVANCE_CHECKPOINT_EXISTS else None
 except Exception:
     RELEVANCE_CONFIG = None

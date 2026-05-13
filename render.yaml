@@ -123,3 +123,19 @@ services:
     envVars:
       - key: AI_SERVICE_HOST
         value: 0.0.0.0
+      - key: AI_CHECKPOINT_SYNC_ENABLED
+        value: "true"
+      - key: AI_CHECKPOINT_SYNC_REQUIRED
+        value: "false"
+      - key: AI_CHECKPOINT_FORCE_DOWNLOAD
+        value: "false"
+      - key: AI_CHECKPOINT_DOWNLOAD_TIMEOUT
+        value: "120"
+      - key: AI_SEVERITY_CHECKPOINT_URL
+        sync: false
+      - key: AI_SEVERITY_CHECKPOINT_SHA256
+        sync: false
+      - key: AI_PHOTO_RELEVANCE_CHECKPOINT_URL
+        sync: false
+      - key: AI_PHOTO_RELEVANCE_CHECKPOINT_SHA256
+        sync: false

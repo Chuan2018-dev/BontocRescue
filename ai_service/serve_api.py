@@ -6,11 +6,15 @@ import os
 
 import uvicorn
 
+from src.ai_service.checkpoint_sync import sync_checkpoints_from_env
+
 
 
 def main() -> None:
     host = os.getenv("AI_SERVICE_HOST", "0.0.0.0")
     port = int(os.getenv("PORT", os.getenv("AI_SERVICE_PORT", "8100")))
+
+    sync_checkpoints_from_env()
 
     uvicorn.run("src.ai_service.api:app", host=host, port=port, reload=False)
 
