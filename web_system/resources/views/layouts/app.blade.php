@@ -121,6 +121,10 @@
         .capture-action-icon{display:inline-flex;width:38px;height:38px;border-radius:12px;align-items:center;justify-content:center;background:rgba(255,255,255,.18);color:#fff;font-weight:900}
         .civilian-mobile-status-card{padding:12px 14px;border-radius:16px;background:var(--surface-alt);border:1px solid rgba(15,31,47,.08);display:grid;gap:6px}
         .civilian-mobile-status-card p{font-weight:800;color:var(--ink);line-height:1.5}
+        .civilian-gps-fallback-panel[hidden]{display:none}
+        .civilian-gps-fallback-panel{padding:14px;border-radius:18px;background:linear-gradient(180deg,#fff,rgba(255,248,232,.96));border:1px solid rgba(209,139,31,.24);display:grid;gap:10px}
+        .civilian-gps-fallback-panel strong{font-size:1rem;line-height:1.35}
+        .civilian-gps-fallback-panel p{margin:0;line-height:1.55;color:var(--muted)}
         .civilian-compact-details{border:1px solid rgba(15,31,47,.10);border-radius:18px;background:#fff;overflow:hidden}
         .civilian-compact-details summary{padding:14px 16px;cursor:pointer;font-weight:900;color:var(--blue)}
         .civilian-compact-details .preview-grid{padding:0 16px 16px}

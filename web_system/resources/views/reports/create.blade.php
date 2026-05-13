@@ -61,7 +61,7 @@
                     <section class="form-step-card civilian-capture-panel">
                         <span class="form-step-label">Emergency Report</span>
                         <strong>Use these field actions.</strong>
-                        <p class="civilian-mobile-hint">Photo, GPS, and description are required first. Video is optional. Front-camera selfie verification opens after Send Report.</p>
+                        <p class="civilian-mobile-hint">Photo, GPS or manual location, and description are required first. Video is optional. Front-camera selfie verification opens after Send Report.</p>
 
                         <input type="file" name="evidence_photo_capture" accept="image/*" capture="environment" hidden data-capture-photo-input>
                         <input type="file" name="evidence_video_capture" accept="video/*" capture="environment" hidden data-capture-video-input>
@@ -71,9 +71,9 @@
                         <input type="hidden" name="incident_type" value="{{ old('incident_type', 'General Emergency') }}">
                         <input type="hidden" name="transmission_type" value="{{ old('transmission_type', 'online') }}">
                         <input type="hidden" name="severity" value="{{ old('severity') }}">
-                        <input id="location_text" type="hidden" name="location_text" value="{{ old('location_text') }}">
                         <input id="latitude" type="hidden" name="latitude" value="{{ old('latitude') }}" data-geo-latitude>
                         <input id="longitude" type="hidden" name="longitude" value="{{ old('longitude') }}" data-geo-longitude>
+                        <input type="hidden" name="gps_fallback_used" value="{{ old('gps_fallback_used', '0') }}" data-gps-fallback-used>
                         <button type="button" class="visually-hidden-control" data-geo-fill-button>Get Current Latitude and Longitude</button>
 
                         <div class="capture-action-grid civilian-three-button-grid">
@@ -98,7 +98,7 @@
                         </div>
 
                         <div class="civilian-mobile-status-card">
-                            <p data-capture-submit-status>Required first: photo, GPS, and short description.</p>
+                            <p data-capture-submit-status>Required first: photo, GPS or manual location, and short description.</p>
                             <p data-geo-status>GPS not locked yet.</p>
                             <div class="visually-hidden-control" aria-hidden="true">
                                 <span data-requirement-status="photo">Still required</span>
@@ -109,6 +109,17 @@
                                 <span data-draft-autosave-state>Autosave ready</span>
                                 <span data-draft-status>Draft ready.</span>
                             </div>
+                        </div>
+
+                        <div class="civilian-gps-fallback-panel" data-gps-fallback-panel hidden>
+                            <span class="tag amber">iOS GPS fallback</span>
+                            <strong>Type your barangay, road, or landmark.</strong>
+                            <p>Some iPhone in-app browsers like Messenger block GPS. If that happens, type the nearest location so responders still receive a usable report.</p>
+                            <div class="field">
+                                <label for="location_text">Barangay / road / landmark</label>
+                                <input id="location_text" class="input" type="text" name="location_text" value="{{ old('location_text') }}" placeholder="Example: Poblacion near Bontoc Public Market" data-manual-location-input>
+                            </div>
+                            <p class="section-copy">Best fix on iPhone: open this link in Safari or install the PWA, then allow Location permission.</p>
                         </div>
 
                         <details class="civilian-compact-details">
@@ -174,7 +185,7 @@
 
                     <section class="form-step-card report-submit-card civilian-send-card">
                         <strong>Send when complete.</strong>
-                        <p>Tap Send Report after photo, GPS, and description. The system will request a front-camera verification selfie before final submit.</p>
+                        <p>Tap Send Report after photo, GPS or manual location, and description. The system will request a front-camera verification selfie before final submit.</p>
                         <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Send Report</button>
                     </section>
                 </div>

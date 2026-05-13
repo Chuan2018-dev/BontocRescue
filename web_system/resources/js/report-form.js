@@ -56,6 +56,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoBadge = root.querySelector('[data-capture-badge="video"]');
     const selfieBadge = root.querySelector('[data-capture-badge="selfie"]');
     const gpsBadge = root.querySelector('[data-capture-badge="gps"]');
+    const gpsFallbackInput = root.querySelector('[data-gps-fallback-used]');
+    const gpsFallbackPanel = root.querySelector('[data-gps-fallback-panel]');
+    const manualLocationInput = root.querySelector('[data-manual-location-input]');
     const photoRequirement = root.querySelector('[data-requirement-status="photo"]');
     const selfieRequirement = root.querySelector('[data-requirement-status="selfie"]');
     const gpsRequirement = root.querySelector('[data-requirement-status="gps"]');
@@ -88,6 +91,13 @@ document.addEventListener('DOMContentLoaded', () => {
         badge.textContent = label;
     };
 
+    const userAgent = navigator.userAgent || '';
+    const platform = navigator.platform || '';
+    const isIOSLike = /iPad|iPhone|iPod/i.test(userAgent)
+        || (platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isEmbeddedBrowser = /FBAN|FBAV|FBIOS|FB_IAB|Messenger|Instagram|Line|Twitter|TikTok/i.test(userAgent);
+    const shouldUseNativeSelfieCapture = () => isIOSLike || isEmbeddedBrowser;
+
     const clearInputFile = (input) => {
         if (input instanceof HTMLInputElement) {
             input.value = '';
@@ -115,11 +125,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const hasRequiredSelfie = () => getActiveSelfieFile() instanceof File;
 
-    const hasRequiredGps = () =>
+    const hasExactGps = () =>
         latitudeInput instanceof HTMLInputElement
         && longitudeInput instanceof HTMLInputElement
         && latitudeInput.value.trim() !== ''
         && longitudeInput.value.trim() !== '';
+
+    const isGpsFallbackActive = () =>
+        gpsFallbackInput instanceof HTMLInputElement
+        && gpsFallbackInput.value === '1';
+
+    const hasManualLocationFallback = () =>
+        isGpsFallbackActive()
+        && locationInput instanceof HTMLInputElement
+        && locationInput.value.trim().length >= 4;
+
+    const hasRequiredGps = () => hasExactGps() || hasManualLocationFallback();
+
+    const setGpsFallbackActive = (active) => {
+        if (gpsFallbackInput instanceof HTMLInputElement) {
+            gpsFallbackInput.value = active ? '1' : '0';
+        }
+
+        if (gpsFallbackPanel instanceof HTMLElement) {
+            gpsFallbackPanel.hidden = !active;
+        }
+    };
+
+    const showGpsFallback = (message) => {
+        setGpsFallbackActive(true);
+        setGeoStatus(message);
+        setBadgeState(gpsBadge, 'amber', hasManualLocationFallback() ? 'Manual location' : 'Type location');
+        updateCivilianReadiness();
+
+        if (manualLocationInput instanceof HTMLInputElement) {
+            manualLocationInput.focus();
+        }
+    };
 
     const hasRequiredDescription = () =>
         descriptionInput instanceof HTMLTextAreaElement
@@ -324,7 +366,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const photoReady = hasRequiredPhoto();
-        const gpsReady = hasRequiredGps();
+        const exactGpsReady = hasExactGps();
+        const manualGpsReady = hasManualLocationFallback();
+        const gpsReady = exactGpsReady || manualGpsReady;
         const descriptionReady = hasRequiredDescription();
         const selfieReady = hasRequiredSelfie();
         const readyForSelfieGate = photoReady && gpsReady && descriptionReady;
@@ -332,8 +376,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setBadgeState(photoRequirement, photoReady ? 'green' : 'red', photoReady ? 'Ready' : 'Still required');
         setBadgeState(selfieRequirement, selfieReady ? 'green' : 'blue', selfieReady ? 'Ready' : 'Opens on send');
-        setBadgeState(gpsRequirement, gpsReady ? 'green' : 'red', gpsReady ? 'Ready' : 'Still required');
+        setBadgeState(gpsRequirement, gpsReady ? 'green' : 'red', gpsReady ? (manualGpsReady && !exactGpsReady ? 'Manual ready' : 'Ready') : 'Still required');
         setBadgeState(descriptionRequirement, descriptionReady ? 'green' : 'red', descriptionReady ? 'Ready' : 'Still required');
+
+        if (exactGpsReady) {
+            setBadgeState(gpsBadge, 'green', 'GPS ready');
+        } else if (manualGpsReady) {
+            setBadgeState(gpsBadge, 'amber', 'Manual location');
+        } else if (isGpsFallbackActive()) {
+            setBadgeState(gpsBadge, 'amber', 'Type location');
+        }
 
         if (submitButton instanceof HTMLButtonElement) {
             submitButton.disabled = !readyForSelfieGate;
@@ -345,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? 'Verification selfie is ready. Sending can continue.'
                 : readyForSelfieGate
                     ? 'Tap Send Report to open selfie verification before final submit.'
-                    : 'Complete the real scene photo, GPS lock, and short description first. Screenshots, app UI, and unrelated dummy photos are not accepted.';
+                    : 'Complete the real scene photo, GPS or manual location, and short description first. Screenshots, app UI, and unrelated dummy photos are not accepted.';
         }
 
         return readyForSelfieGate;
@@ -412,6 +464,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const waitForVideoReady = (video, timeoutMs = 2600) => new Promise((resolve) => {
+        if (!(video instanceof HTMLVideoElement)) {
+            resolve(false);
+            return;
+        }
+
+        if (video.videoWidth > 0 && video.videoHeight > 0) {
+            resolve(true);
+            return;
+        }
+
+        let settled = false;
+        let timeoutId = null;
+        const cleanup = () => {
+            video.removeEventListener('loadedmetadata', check);
+            video.removeEventListener('canplay', check);
+            video.removeEventListener('playing', check);
+            if (timeoutId !== null) {
+                window.clearTimeout(timeoutId);
+            }
+        };
+        const finish = (value) => {
+            if (settled) {
+                return;
+            }
+
+            settled = true;
+            cleanup();
+            resolve(value);
+        };
+        const check = () => {
+            if (video.videoWidth > 0 && video.videoHeight > 0) {
+                finish(true);
+            }
+        };
+
+        video.addEventListener('loadedmetadata', check);
+        video.addEventListener('canplay', check);
+        video.addEventListener('playing', check);
+        timeoutId = window.setTimeout(() => finish(video.videoWidth > 0 && video.videoHeight > 0), timeoutMs);
+        check();
+    });
+
     const assignSelfieFile = (file) => {
         if (!(selfieCaptureInput instanceof HTMLInputElement) || !(file instanceof File) || typeof DataTransfer === 'undefined') {
             return false;
@@ -444,12 +539,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const openPhoneSelfieFallback = () => {
+    const openPhoneSelfieFallback = (message = 'Opening phone camera for selfie verification.') => {
         stopSelfieCamera();
         hideSelfieCameraModal();
 
         if (submitStatus) {
-            submitStatus.textContent = 'Opening phone camera for selfie verification.';
+            submitStatus.textContent = message;
         }
 
         if (selfieCaptureInput instanceof HTMLInputElement) {
@@ -491,6 +586,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 await playAttempt;
             }
 
+            const videoReady = await waitForVideoReady(selfieCameraPreview);
+            if (!videoReady) {
+                throw new Error('front-camera-preview-not-ready');
+            }
+
             setSelfieCameraStatus('Front camera is ready. Center your face, then capture the verification selfie.');
 
             if (selfieCameraCaptureButton instanceof HTMLButtonElement) {
@@ -524,7 +624,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const height = selfieCameraPreview.videoHeight;
 
         if (!width || !height) {
-            setSelfieCameraStatus('Front camera preview is not ready yet. Please wait a moment, then try again.');
+            setSelfieCameraStatus('The front camera preview is still blank. Use the phone camera fallback to avoid delay.');
+            if (selfieCameraRetryButton instanceof HTMLButtonElement) {
+                selfieCameraRetryButton.hidden = false;
+            }
+
+            if (selfieCameraCaptureButton instanceof HTMLButtonElement) {
+                selfieCameraCaptureButton.disabled = true;
+            }
             return;
         }
 
@@ -577,6 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (submitStatus) {
             submitStatus.textContent = 'Opening front-camera selfie verification. Capture your face clearly to submit the report.';
+        }
+
+        if (shouldUseNativeSelfieCapture()) {
+            openPhoneSelfieFallback('Opening iPhone front camera for selfie verification. If Messenger blocks it, open the site in Safari or the installed PWA.');
+            return;
         }
 
         if (await startFrontSelfieCamera()) {
@@ -715,16 +827,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     geoButton?.addEventListener('click', () => {
         if (!navigator.geolocation) {
-            setGeoStatus('Browser geolocation is not available on this device.');
-            setBadgeState(gpsBadge, 'red', 'GPS blocked');
+            showGpsFallback('Browser GPS is not available on this device. Type the nearest barangay, road, or landmark instead.');
             return;
         }
 
         const host = window.location.hostname;
         const isLocalhost = ['localhost', '127.0.0.1'].includes(host);
         if (!window.isSecureContext && !isLocalhost) {
-            setGeoStatus('Browser GPS is blocked on this non-secure page. Use localhost or HTTPS to allow location access.');
-            setBadgeState(gpsBadge, 'red', 'GPS blocked');
+            showGpsFallback('Browser GPS is blocked on this non-secure page. Use HTTPS, localhost, or type the nearest barangay/landmark instead.');
             return;
         }
 
@@ -758,6 +868,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     locationInput.dispatchEvent(new Event('change', { bubbles: true }));
                 }
 
+                setGpsFallbackActive(false);
                 setGeoStatus(`GPS coordinates loaded: ${latitude}, ${longitude}`);
                 setBadgeState(gpsBadge, 'green', 'GPS ready');
                 updateCivilianReadiness();
@@ -767,15 +878,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             (error) => {
+                const deniedMessage = isIOSLike || isEmbeddedBrowser
+                    ? 'iOS or Messenger blocked GPS. Open in Safari/PWA and allow Location, or type your barangay/landmark below.'
+                    : 'Location permission was denied. Allow location access and try again, or type the nearest barangay/landmark below.';
                 const messageMap = {
-                    1: 'Location permission was denied. Allow location access and try again.',
-                    2: 'Your location is unavailable right now. Try again in an open area or with GPS enabled.',
-                    3: 'Location request timed out. Please try again.',
+                    1: deniedMessage,
+                    2: 'GPS is unavailable right now. Type the nearest barangay/landmark below, or retry in an open area.',
+                    3: 'GPS request timed out. Type the nearest barangay/landmark below, or retry when signal improves.',
                 };
 
-                setGeoStatus(messageMap[error.code] ?? 'Unable to get GPS coordinates from the browser.');
-                setBadgeState(gpsBadge, error.code === 1 ? 'red' : 'amber', error.code === 1 ? 'GPS denied' : 'GPS retry');
-                updateCivilianReadiness();
+                showGpsFallback(messageMap[error.code] ?? 'Unable to get GPS coordinates from the browser. Type the nearest barangay/landmark below.');
 
                 if (geoButton instanceof HTMLButtonElement) {
                     geoButton.disabled = false;
@@ -867,16 +979,25 @@ document.addEventListener('DOMContentLoaded', () => {
     updateVideoBadge();
     updateSelfiePreview(getActiveSelfieFile());
 
-    if ((latitudeInput instanceof HTMLInputElement && latitudeInput.value.trim()) || (longitudeInput instanceof HTMLInputElement && longitudeInput.value.trim())) {
+    if (hasExactGps()) {
+        setGpsFallbackActive(false);
         setBadgeState(gpsBadge, 'green', 'GPS ready');
+    } else if (isGpsFallbackActive()) {
+        setGpsFallbackActive(true);
     }
 
-    [latitudeInput, longitudeInput, descriptionInput].forEach((element) => {
+    [latitudeInput, longitudeInput, descriptionInput, manualLocationInput, gpsFallbackInput].forEach((element) => {
         element?.addEventListener('input', () => {
-            if (hasRequiredGps()) {
+            if (element === gpsFallbackInput) {
+                setGpsFallbackActive(isGpsFallbackActive());
+            }
+
+            if (hasExactGps()) {
                 setBadgeState(gpsBadge, 'green', 'GPS ready');
+            } else if (hasManualLocationFallback()) {
+                setBadgeState(gpsBadge, 'amber', 'Manual location');
             } else {
-                setBadgeState(gpsBadge, 'neutral', 'GPS pending');
+                setBadgeState(gpsBadge, isGpsFallbackActive() ? 'amber' : 'neutral', isGpsFallbackActive() ? 'Type location' : 'GPS pending');
             }
 
             updateCivilianReadiness();
@@ -890,7 +1011,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!updateCivilianReadiness()) {
             event.preventDefault();
-            setGeoStatus('Complete the scene photo, GPS lock, and short description before sending.');
+            setGeoStatus('Complete the scene photo, GPS or manual location, and short description before sending.');
             return;
         }
 

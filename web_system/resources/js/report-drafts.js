@@ -261,7 +261,7 @@ const restoreDraftFile = (input, file, emptyMessage, manualMessage) => {
 };
 
 const getDraftFields = (form) => {
-    const fieldNames = ['incident_type', 'transmission_type', 'severity', 'description', 'location_text', 'latitude', 'longitude'];
+    const fieldNames = ['incident_type', 'transmission_type', 'severity', 'description', 'location_text', 'latitude', 'longitude', 'gps_fallback_used'];
 
     return fieldNames.reduce((fields, name) => {
         const element = form.elements.namedItem(name);

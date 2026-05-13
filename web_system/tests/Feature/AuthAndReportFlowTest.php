@@ -394,7 +394,7 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('Short Description')
             ->assertSee('Front-camera selfie verification opens after Send Report.')
             ->assertSee('Front-camera selfie verification')
-            ->assertSee('Tap Send Report after photo, GPS, and description.')
+            ->assertSee('Tap Send Report after photo, GPS or manual location, and description.')
             ->assertSee('data-report-draft-form', false)
             ->assertSee('data-capture-trigger="photo"', false)
             ->assertSee('data-capture-trigger="video"', false)
@@ -407,6 +407,9 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('data-geo-fill-button', false)
             ->assertSee('data-geo-latitude', false)
             ->assertSee('data-geo-longitude', false)
+            ->assertSee('data-gps-fallback-used', false)
+            ->assertSee('data-gps-fallback-panel', false)
+            ->assertSee('iOS GPS fallback')
             ->assertDontSee('Manual Report Entry')
             ->assertDontSee('Offline draft queue')
             ->assertDontSee('Save Draft Now')
@@ -477,6 +480,60 @@ class AuthAndReportFlowTest extends TestCase
         $this->assertNotNull($report->evidence_path);
         $this->assertNotNull($report->reporter_selfie_path);
         $this->assertNotNull($report->reporter_selfie_captured_at);
+        Storage::assertExists($report->evidence_path);
+        Storage::assertExists($report->reporter_selfie_path);
+        Event::assertDispatched(IncidentFeedUpdated::class);
+    }
+
+    public function test_civilian_web_report_submission_accepts_ios_manual_location_fallback(): void
+    {
+        Storage::fake();
+        Event::fake([IncidentFeedUpdated::class]);
+        Http::fake([
+            '*' => Http::response([
+                'accepted' => true,
+                'severity' => 'serious',
+                'confidence' => 0.88,
+                'responder_review_required' => false,
+                'probabilities' => [
+                    'minor' => 0.08,
+                    'serious' => 0.88,
+                    'fatal' => 0.04,
+                ],
+                'photo_relevance_label' => 'related',
+                'photo_relevance_confidence' => 0.97,
+            ]),
+        ]);
+
+        $civilian = User::factory()->create([
+            'role' => 'civilian',
+            'name' => 'IOS Fallback User',
+        ]);
+
+        $manualLocation = 'Poblacion near Bontoc Public Market';
+
+        $this->actingAs($civilian)
+            ->post(route('reports.store'), [
+                'incident_type' => 'Road Emergency',
+                'severity' => '',
+                'transmission_type' => 'online',
+                'gps_fallback_used' => '1',
+                'location_text' => $manualLocation,
+                'description' => 'Vehicle crash near the market entrance.',
+                'evidence' => UploadedFile::fake()->image('ios-scene-photo.jpg'),
+                'selfie' => UploadedFile::fake()->image('ios-verification-selfie.jpg'),
+            ])
+            ->assertRedirect();
+
+        $report = IncidentReport::query()->latest('id')->firstOrFail();
+
+        $this->assertSame($civilian->id, $report->reported_by);
+        $this->assertSame($manualLocation, $report->location_text);
+        $this->assertNull($report->latitude);
+        $this->assertNull($report->longitude);
+        $this->assertSame('photo', $report->evidence_type);
+        $this->assertNotNull($report->evidence_path);
+        $this->assertNotNull($report->reporter_selfie_path);
         Storage::assertExists($report->evidence_path);
         Storage::assertExists($report->reporter_selfie_path);
         Event::assertDispatched(IncidentFeedUpdated::class);
@@ -1851,4 +1908,3 @@ class AuthAndReportFlowTest extends TestCase
             ->assertRedirect(route('dashboard'));
     }
 }
-

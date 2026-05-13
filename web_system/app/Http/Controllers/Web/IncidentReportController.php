@@ -124,12 +124,14 @@ class IncidentReportController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $isCivilian = $request->user()?->isCivilian() ?? false;
+        $usesManualGpsFallback = $isCivilian && $request->boolean('gps_fallback_used');
 
         $validator = Validator::make($request->all(), [
             'description' => ['required', 'string', 'max:1000'],
             'location_text' => ['required', 'string', 'max:180'],
-            'latitude' => [$isCivilian ? 'required' : 'nullable', 'numeric'],
-            'longitude' => [$isCivilian ? 'required' : 'nullable', 'numeric'],
+            'gps_fallback_used' => ['nullable', 'boolean'],
+            'latitude' => [Rule::requiredIf($isCivilian && ! $usesManualGpsFallback), 'nullable', 'numeric'],
+            'longitude' => [Rule::requiredIf($isCivilian && ! $usesManualGpsFallback), 'nullable', 'numeric'],
             'incident_type' => ['nullable', 'string', 'max:80'],
             'severity' => ['nullable', 'string', 'max:20'],
             'transmission_type' => ['nullable', 'in:auto,online,lora'],
@@ -149,8 +151,8 @@ class IncidentReportController extends Controller
                 'mimes:jpg,jpeg,png,webp',
             ],
         ], [
-            'latitude.required' => 'Lock GPS before sending the emergency report.',
-            'longitude.required' => 'Lock GPS before sending the emergency report.',
+            'latitude.required' => 'Lock GPS or type a manual location before sending the emergency report.',
+            'longitude.required' => 'Lock GPS or type a manual location before sending the emergency report.',
             'selfie.required_without' => 'Capture or attach a verification selfie before sending the report.',
             'selfie_capture.required_without' => 'Capture or attach a verification selfie before sending the report.',
         ]);
