@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const selfieInput = root.querySelector('input[name="selfie"]');
     const photoCaptureInput = root.querySelector('[data-capture-photo-input]');
     const videoCaptureInput = root.querySelector('[data-capture-video-input]');
+    const selfieCaptureInput = root.querySelector('[data-capture-selfie-input]');
     const evidencePreviewImage = root.querySelector('[data-evidence-preview-image]');
     const evidencePreviewVideo = root.querySelector('[data-evidence-preview-video]');
     const evidencePreviewName = root.querySelector('[data-evidence-preview-name]');
@@ -57,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let evidencePreviewUrl = null;
     let selfiePreviewUrl = null;
     let evidenceInspectionToken = 0;
+    let pendingSubmitAfterSelfie = false;
 
     if (!(form instanceof HTMLFormElement)) {
         return;
@@ -91,13 +93,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const getActiveVideoFile = () => videoCaptureInput?.files?.[0] ?? null;
 
-    const getActiveSelfieFile = () => selfieInput?.files?.[0] ?? null;
+    const getActiveSelfieFile = () =>
+        selfieCaptureInput?.files?.[0]
+        ?? selfieInput?.files?.[0]
+        ?? null;
 
     const hasRequiredPhoto = () => {
         const activeEvidence = getActiveEvidenceFile();
 
         return activeEvidence instanceof File && activeEvidence.type.startsWith('image/');
     };
+
+    const hasRequiredSelfie = () => getActiveSelfieFile() instanceof File;
 
     const hasRequiredGps = () =>
         latitudeInput instanceof HTMLInputElement
@@ -310,24 +317,63 @@ document.addEventListener('DOMContentLoaded', () => {
         const photoReady = hasRequiredPhoto();
         const gpsReady = hasRequiredGps();
         const descriptionReady = hasRequiredDescription();
-        const allReady = photoReady && gpsReady && descriptionReady;
+        const selfieReady = hasRequiredSelfie();
+        const readyForSelfieGate = photoReady && gpsReady && descriptionReady;
+        const allReady = readyForSelfieGate && selfieReady;
 
         setBadgeState(photoRequirement, photoReady ? 'green' : 'red', photoReady ? 'Ready' : 'Still required');
+        setBadgeState(selfieRequirement, selfieReady ? 'green' : 'blue', selfieReady ? 'Ready' : 'Opens on send');
         setBadgeState(gpsRequirement, gpsReady ? 'green' : 'red', gpsReady ? 'Ready' : 'Still required');
         setBadgeState(descriptionRequirement, descriptionReady ? 'green' : 'red', descriptionReady ? 'Ready' : 'Still required');
 
         if (submitButton instanceof HTMLButtonElement) {
-            submitButton.disabled = !allReady;
-            submitButton.setAttribute('aria-disabled', allReady ? 'false' : 'true');
+            submitButton.disabled = !readyForSelfieGate;
+            submitButton.setAttribute('aria-disabled', readyForSelfieGate ? 'false' : 'true');
         }
 
         if (submitStatus) {
             submitStatus.textContent = allReady
-                ? 'Ready to send. Tap Send Report to submit now.'
-                : 'Complete the real scene photo, GPS lock, and short description first. Screenshots, app UI, and unrelated dummy photos are not accepted.';
+                ? 'Verification selfie is ready. Sending can continue.'
+                : readyForSelfieGate
+                    ? 'Tap Send Report to open selfie verification before final submit.'
+                    : 'Complete the real scene photo, GPS lock, and short description first. Screenshots, app UI, and unrelated dummy photos are not accepted.';
         }
 
-        return allReady;
+        return readyForSelfieGate;
+    };
+
+    const openSelfieVerification = () => {
+        pendingSubmitAfterSelfie = true;
+
+        if (submitStatus) {
+            submitStatus.textContent = 'Opening selfie verification. Capture your face clearly to submit the report.';
+        }
+
+        if (selfieCaptureInput instanceof HTMLInputElement) {
+            selfieCaptureInput.click();
+            return;
+        }
+
+        selfieInput?.click();
+    };
+
+    const submitAfterSelfieVerification = () => {
+        pendingSubmitAfterSelfie = false;
+        if (submitStatus) {
+            submitStatus.textContent = 'Selfie verified. Sending report now...';
+        }
+
+        if (typeof form.requestSubmit === 'function') {
+            form.requestSubmit(submitButton instanceof HTMLButtonElement ? submitButton : undefined);
+            return;
+        }
+
+        if (submitButton instanceof HTMLButtonElement) {
+            submitButton.click();
+            return;
+        }
+
+        form.submit();
     };
 
     const updateEvidencePreview = (file) => {
@@ -522,6 +568,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 photoCaptureInput?.click();
             } else if (trigger === 'video') {
                 videoCaptureInput?.click();
+            } else if (trigger === 'selfie') {
+                selfieCaptureInput?.click();
             } else if (trigger === 'gps') {
                 gpsFocusButton?.blur();
                 geoButton?.click();
@@ -539,6 +587,15 @@ document.addEventListener('DOMContentLoaded', () => {
         updateEvidencePreview(getActiveEvidenceFile());
     });
 
+    selfieCaptureInput?.addEventListener('change', () => {
+        clearInputFile(selfieInput);
+        updateSelfiePreview(getActiveSelfieFile());
+
+        if (pendingSubmitAfterSelfie && hasRequiredSelfie()) {
+            submitAfterSelfieVerification();
+        }
+    });
+
     evidenceInput?.addEventListener('change', () => {
         clearInputFile(photoCaptureInput);
         clearInputFile(videoCaptureInput);
@@ -547,7 +604,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     selfieInput?.addEventListener('change', () => {
+        clearInputFile(selfieCaptureInput);
         updateSelfiePreview(getActiveSelfieFile());
+
+        if (pendingSubmitAfterSelfie && hasRequiredSelfie()) {
+            submitAfterSelfieVerification();
+        }
     });
 
     updateEvidencePreview(getActiveEvidenceFile());
@@ -581,6 +643,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        if (!hasRequiredSelfie()) {
+            event.preventDefault();
+            openSelfieVerification();
+        }
     });
 
     updateCivilianReadiness();

@@ -147,7 +147,7 @@ class ApiMobileFlowTest extends TestCase
         ])->get('/api/v1/reports/'.$report->id.'/selfie')->assertOk();
     }
 
-    public function test_mobile_client_can_submit_civilian_report_without_verification_selfie(): void
+    public function test_mobile_client_rejects_civilian_report_without_verification_selfie(): void
     {
         Storage::fake();
 
@@ -169,12 +169,10 @@ class ApiMobileFlowTest extends TestCase
         ])->post('/api/v1/reports', [
             'incident_type' => 'Vehicular Collision',
             'location_text' => 'National Road Junction',
-            'description' => 'Emergency submission without a live verification selfie should still go through.',
+            'description' => 'Attempted emergency submission without the required live verification selfie.',
             'transmission_type' => 'online',
             'evidence_type' => 'none',
-        ])->assertCreated()
-            ->assertJsonPath('data.selfie_available', false)
-            ->assertJsonPath('data.selfie_url', null);
+        ])->assertInvalid(['selfie']);
     }
 
     public function test_mobile_api_rejects_blocked_civilian_login_and_existing_token_access(): void

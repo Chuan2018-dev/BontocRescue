@@ -392,12 +392,12 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('Record Video')
             ->assertSee('Lock GPS')
             ->assertSee('Short Description')
+            ->assertSee('Selfie verification opens after Send Report.')
             ->assertSee('Tap Send Report after photo, GPS, and description.')
-            ->assertSee('No front camera step will open.')
             ->assertSee('data-report-draft-form', false)
             ->assertSee('data-capture-trigger="photo"', false)
             ->assertSee('data-capture-trigger="video"', false)
-            ->assertDontSee('data-capture-selfie-input', false)
+            ->assertSee('data-capture-selfie-input', false)
             ->assertDontSee('data-capture-trigger="selfie"', false)
             ->assertSee('data-capture-trigger="gps"', false)
             ->assertSee('data-geo-fill-button', false)
@@ -427,7 +427,7 @@ class AuthAndReportFlowTest extends TestCase
             ->assertDontSee('Civilian Reporting Flow');
     }
 
-    public function test_civilian_web_report_submission_accepts_scene_media_without_verification_selfie(): void
+    public function test_civilian_web_report_submission_accepts_scene_media_and_verification_selfie(): void
     {
         Storage::fake();
         Event::fake([IncidentFeedUpdated::class]);
@@ -462,6 +462,7 @@ class AuthAndReportFlowTest extends TestCase
                 'longitude' => '124.970400',
                 'description' => 'Motorcycle and tricycle collision near the main road.',
                 'evidence' => UploadedFile::fake()->image('scene-photo.jpg'),
+                'selfie' => UploadedFile::fake()->image('verification-selfie.jpg'),
             ])
             ->assertRedirect();
 
@@ -470,13 +471,14 @@ class AuthAndReportFlowTest extends TestCase
         $this->assertSame($civilian->id, $report->reported_by);
         $this->assertSame('photo', $report->evidence_type);
         $this->assertNotNull($report->evidence_path);
-        $this->assertNull($report->reporter_selfie_path);
-        $this->assertNull($report->reporter_selfie_captured_at);
+        $this->assertNotNull($report->reporter_selfie_path);
+        $this->assertNotNull($report->reporter_selfie_captured_at);
         Storage::assertExists($report->evidence_path);
+        Storage::assertExists($report->reporter_selfie_path);
         Event::assertDispatched(IncidentFeedUpdated::class);
     }
 
-    public function test_civilian_report_submission_requires_photo_gps_and_description(): void
+    public function test_civilian_report_submission_requires_photo_selfie_gps_and_description(): void
     {
         Storage::fake();
 
@@ -495,7 +497,7 @@ class AuthAndReportFlowTest extends TestCase
                 'description' => 'Blocked lane after collision.',
             ])
             ->assertRedirect(route('reports.create'))
-            ->assertSessionHasErrors(['latitude', 'longitude', 'evidence']);
+            ->assertSessionHasErrors(['latitude', 'longitude', 'evidence', 'selfie']);
     }
 
     public function test_permission_readiness_page_checks_device_access_before_reporting(): void

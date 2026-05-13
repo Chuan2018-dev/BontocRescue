@@ -51,7 +51,12 @@ class IncidentReportApiController extends Controller
             'transmission_type' => ['nullable', 'in:auto,online,lora'],
             'evidence_type' => ['nullable', 'in:none,photo,video'],
             'evidence' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,webp,mp4,mov,avi,3gp'],
-            'selfie' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,webp'],
+            'selfie' => [
+                $user->isCivilian() ? 'required' : 'nullable',
+                'file',
+                'max:10240',
+                'mimes:jpg,jpeg,png,webp',
+            ],
         ]);
 
         $fallbackAnalysis = AiSeverityMapper::fallbackFromDescription(
