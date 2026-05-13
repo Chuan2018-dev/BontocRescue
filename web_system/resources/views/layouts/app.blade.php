@@ -163,6 +163,64 @@
         .requirement-item .tag{justify-self:start}
         .report-submit-card{position:sticky;top:20px}
         .btn[disabled],.action-btn[disabled],.pill-btn[disabled]{opacity:.58;cursor:not-allowed;transform:none;box-shadow:none}
+        .command-hero{padding:22px;border-radius:28px;background:linear-gradient(135deg,#fff 0%,#f8fbff 58%,#fff3f3 100%);border:1px solid rgba(15,31,47,.10);box-shadow:var(--shadow-soft);display:grid;grid-template-columns:minmax(0,.92fr) minmax(420px,1.08fr);gap:18px;align-items:stretch}
+        .command-hero-main{padding:8px 6px;display:grid;align-content:center;gap:12px}
+        .command-hero-main h2{margin:0;font-family:"Bahnschrift","Trebuchet MS",sans-serif;font-size:clamp(2rem,4vw,3.4rem);line-height:.98;letter-spacing:-.06em}
+        .command-hero-main p{margin:0;color:var(--muted);line-height:1.65;max-width:62ch}
+        .command-action-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+        .command-action{min-width:0;min-height:132px;padding:16px;border-radius:22px;background:#fff;border:1px solid rgba(15,31,47,.10);box-shadow:none;color:var(--ink);display:grid;align-content:space-between;gap:10px;text-align:left;cursor:pointer;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+        .command-action:hover,.command-action:focus-visible{transform:translateY(-2px);border-color:rgba(201,28,33,.22);box-shadow:0 16px 32px rgba(12,25,39,.08);outline:0}
+        .command-action.primary{background:linear-gradient(135deg,var(--accent),var(--accent-strong));color:#fff;border-color:rgba(159,19,24,.25)}
+        .command-action span{display:inline-flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:14px;background:rgba(15,31,47,.06);font-weight:900}
+        .command-action.primary span{background:rgba(255,255,255,.18)}
+        .command-action strong{font-size:1rem;line-height:1.2}
+        .command-action small{color:var(--muted);font-weight:800;line-height:1.35}
+        .command-action.primary small{color:rgba(255,255,255,.82)}
+        .command-stat-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+        .command-stat{padding:16px;border-radius:20px;background:#fff;border:1px solid rgba(15,31,47,.09);box-shadow:var(--shadow-soft);display:grid;gap:9px;min-width:0}
+        .command-stat span,.command-mini-metrics span{font-size:.7rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+        .command-stat strong,.command-mini-metrics strong{font-family:"Bahnschrift","Trebuchet MS",sans-serif;font-size:2.1rem;line-height:1;letter-spacing:-.05em}
+        .command-stat p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.5}
+        .command-stat.urgent{border-color:rgba(209,139,31,.22);background:linear-gradient(180deg,#fff,rgba(255,248,232,.92))}
+        .command-stat.danger{border-color:rgba(199,38,38,.20);background:linear-gradient(180deg,#fff,rgba(255,241,241,.94))}
+        .command-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.38fr);gap:18px;align-items:start}
+        .command-layout.reverse{grid-template-columns:minmax(0,.68fr) minmax(320px,.32fr)}
+        .command-side-stack,.command-review-list,.command-person-list,.command-audit-list{display:grid;gap:12px}
+        .command-two-column{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+        .command-focus-panel,.command-compact-panel{background:rgba(255,255,255,.9)}
+        .command-panel-head{align-items:flex-start}
+        .command-panel-head .btn{flex:0 0 auto}
+        .command-review-card,.command-person-card,.command-priority-card,.command-empty-state,.command-audit-card,.command-readiness-list div,.command-mini-metrics div{border:1px solid rgba(15,31,47,.09);background:#fff;border-radius:18px;box-shadow:none}
+        .command-review-card{padding:16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:start;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+        .command-review-card:hover,.command-review-card:focus-visible{transform:translateY(-1px);border-color:rgba(32,104,174,.18);box-shadow:0 14px 28px rgba(12,25,39,.06);outline:0}
+        .command-review-card.compact{grid-template-columns:1fr}
+        .command-review-main{display:grid;gap:7px;min-width:0}
+        .command-review-main h3{margin:0;font-family:"Bahnschrift","Trebuchet MS",sans-serif;font-size:1.25rem;line-height:1.1;letter-spacing:-.03em;overflow-wrap:anywhere}
+        .command-review-main p,.command-review-card .detail-copy{margin:0;color:var(--muted);line-height:1.55}
+        .command-review-meta{display:flex;justify-content:flex-end;align-items:flex-start;gap:8px;flex-wrap:wrap}
+        .command-review-footer{grid-column:1 / -1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid rgba(15,31,47,.08);color:var(--muted);font-size:.88rem;font-weight:800}
+        .command-review-footer strong{color:var(--blue)}
+        .command-priority-card,.command-empty-state{padding:16px;display:grid;gap:12px}
+        .command-priority-card p,.command-empty-state p{margin:0;color:var(--muted);line-height:1.6}
+        .command-empty-state{border-style:dashed;background:var(--surface-alt)}
+        .command-empty-state.compact{min-height:150px;align-content:center}
+        .command-readiness-list{display:grid;gap:10px}
+        .command-readiness-list div{padding:13px 14px;display:flex;justify-content:space-between;gap:14px;align-items:flex-start}
+        .command-readiness-list strong{font-size:.92rem}
+        .command-readiness-list span{color:var(--muted);text-align:right;font-size:.88rem;line-height:1.45}
+        .command-person-card{padding:14px 16px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+        .command-person-card strong{display:block;font-size:1rem;line-height:1.3}
+        .command-person-card p{margin:4px 0 0;color:var(--muted);font-size:.9rem;line-height:1.45}
+        .command-map-shell{padding:0;border:0;background:transparent}
+        .command-map-shell .map-canvas{min-height:460px;border-radius:22px}
+        .command-mini-metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+        .command-mini-metrics.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+        .command-mini-metrics div{padding:14px;display:grid;gap:8px}
+        .command-audit-card{padding:14px 16px;display:grid;grid-template-columns:14px minmax(0,1fr);gap:12px}
+        .command-audit-card > span{width:12px;height:12px;border-radius:999px;background:var(--blue);box-shadow:0 0 0 7px rgba(32,104,174,.10);margin-top:5px}
+        .command-audit-card strong{display:block;line-height:1.3}
+        .command-audit-card p{margin:6px 0;color:var(--muted);line-height:1.55}
+        .command-audit-card small{display:block;margin-top:8px;color:var(--muted);font-size:.76rem;font-weight:900;letter-spacing:.10em;text-transform:uppercase}
         .mobile-quick-nav{display:none}
         .profile-shell-grid{align-items:start}
         .profile-photo-grid{grid-template-columns:minmax(0,180px) minmax(0,1fr);align-items:start}
@@ -184,6 +242,11 @@
             .responder-feed-card .action-row form{display:block}
             .responder-feed-card .action-row > *,.responder-feed-card .action-row form > *{min-width:0}
             .responder-feed-card .action-btn,.responder-feed-card .btn{width:100%}
+            .command-hero{grid-template-columns:1fr}
+            .command-action-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+            .command-stat-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+            .command-layout,.command-layout.reverse,.command-two-column{grid-template-columns:1fr}
+            .command-person-card{grid-template-columns:1fr}
             .civilian-account-summary-grid,.civilian-account-form-grid,.civilian-account-action-grid,.profile-photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
             .map-canvas{min-height:400px}
         }
@@ -219,6 +282,16 @@
             .mobile-quick-nav button.is-logout{color:var(--danger)}
             .mobile-quick-nav button.is-logout span{background:rgba(199,38,38,.10);color:var(--danger)}
             .civilian-home-grid,.report-form-shell,.civilian-simple-hero-grid,.civilian-report-hero-grid,.civilian-success-layout,.civilian-success-flow{grid-template-columns:1fr}
+            .command-hero{grid-template-columns:1fr;padding:18px;border-radius:24px}
+            .command-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .command-action{min-height:116px;border-radius:18px}
+            .command-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+            .command-layout,.command-layout.reverse,.command-two-column{grid-template-columns:1fr}
+            .command-review-card,.command-person-card{grid-template-columns:1fr}
+            .command-review-meta{justify-content:flex-start}
+            .command-panel-head{display:grid}
+            .command-panel-head .btn{width:100%}
+            .command-map-shell .map-canvas{min-height:340px}
             .civilian-simple-stats,.civilian-home-status-row,.civilian-latest-card{grid-template-columns:1fr}
             .civilian-success-cards{grid-template-columns:1fr}
             .civilian-four-button-grid,.civilian-three-button-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -237,6 +310,14 @@
             .mobile-quick-nav span,.mobile-quick-nav button span{min-width:30px;min-height:30px;font-size:.68rem}
             .mobile-quick-nav span svg,.mobile-quick-nav button span svg{width:16px;height:16px}
             .pwa-update-card{top:14px;right:10px;width:min(300px,calc(100vw - 20px));padding:12px 14px}
+            .command-hero-main h2{font-size:clamp(1.8rem,10vw,2.35rem)}
+            .command-action-grid,.command-stat-grid,.command-mini-metrics.two{grid-template-columns:1fr}
+            .command-action{min-height:auto;padding:14px}
+            .command-stat{padding:14px}
+            .command-stat strong,.command-mini-metrics strong{font-size:1.8rem}
+            .command-review-card,.command-priority-card,.command-person-card,.command-audit-card,.command-empty-state{border-radius:16px}
+            .command-readiness-list div{display:grid}
+            .command-readiness-list span{text-align:left}
             .civilian-hero-callout,.civilian-helper-card,.civilian-action-card,.civilian-history-card,.form-step-card,.requirement-item{padding:16px}
             .civilian-simple-hero,.civilian-report-hero{padding:16px}
             .civilian-simple-actions,.civilian-home-primary-actions{grid-template-columns:1fr}
