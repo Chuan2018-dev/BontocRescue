@@ -15,12 +15,18 @@ This is not only a severity accuracy issue. The system needs a separate first st
 - The Laravel app already calls the AI service before storing civilian photo reports as accepted.
 - If the AI service rejects the image, Laravel returns a validation error.
 - If the AI service is unavailable and strict gate mode is disabled, Laravel falls back to description-based severity, so dummy photos can pass.
-- The photo relevance training set is imbalanced:
+- Before the Wikimedia negative acquisition, the photo relevance training set was imbalanced:
   - train related: 405
   - train unrelated: 26
   - validation unrelated: 7
   - test unrelated: 7
-- The model can report high overall accuracy while still missing real-world dummy examples because there are too few negative examples.
+- After adding Wikimedia non-incident negatives, the active split now has:
+  - train related: 405
+  - train unrelated: 110
+  - validation unrelated: 19
+  - test unrelated: 31
+- The latest retraining run reached 99.13 percent test accuracy, with 31 of 31 unrelated test photos rejected.
+- The remaining observed error was one related accident/emergency image rejected as unrelated, so the gate is now much safer against dummy photos but still needs more local positive examples to reduce false rejects.
 
 ## Changes Applied
 
@@ -36,10 +42,16 @@ This is not only a severity accuracy issue. The system needs a separate first st
 - Lowered the photo relevance reject threshold:
   - `reject_threshold`: `0.92` to `0.70`
   - `low_confidence_threshold`: `0.65` to `0.75`
+- Added `ai_service/tools/acquire_wikimedia_relevance_negatives.py`.
+  - It pulls public Wikimedia Commons images from reviewed non-incident categories.
+  - It stores source URL, license, artist, and credit metadata in `metadata/wikimedia_relevance_negative_sources_2026_05_13.csv`.
+  - It appends only metadata/manifests to Git; the downloaded training images stay in the ignored local dataset image tree.
+- Added 120 Wikimedia negative examples across food, meals, cats, dogs, rooms, documents, receipts, and normal Philippine road images.
+- Retrained the photo relevance checkpoint at `ai_service/artifacts/checkpoints/bontoc_photo_relevance_best.pt`.
 
 ## Recommended Dataset Fix
 
-Add at least 200 to 500 reviewed negative examples before trusting dummy rejection.
+Keep adding reviewed examples until the validation and test sets each have at least 50 unrelated examples and at least 50 hard real accident/emergency positives.
 
 Recommended negative classes:
 
@@ -62,9 +74,16 @@ Recommended positive classes:
 - rural road emergencies
 - Philippine-like roads and Bontoc/Southern Leyte-like environments
 
+Current priority after this run:
+
+- more normal selfies and profile photos
+- more phone screenshots from Messenger/Facebook/TikTok/browser
+- more dark, blurry, or low-light dummy photos
+- more local positive motorcycle, rain/night, and rural road emergency photos
+
 ## Recommended Split
 
-Keep the relevance gate balanced:
+Move the relevance gate closer to balanced:
 
 - train: roughly 50 percent related, 50 percent unrelated
 - validation: at least 50 unrelated examples
@@ -75,6 +94,13 @@ Do not measure only overall accuracy. Track:
 - unrelated recall
 - false accept rate for dummy photos
 - false reject rate for real accident photos
+
+Latest local metrics:
+
+- test accuracy: 99.13 percent
+- unrelated recall: 100 percent
+- unrelated false accepts in test: 0
+- related false rejects in test: 1
 
 ## Deployment Recommendation
 
