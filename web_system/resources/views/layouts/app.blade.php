@@ -102,6 +102,13 @@
         .civilian-latest-card{padding:16px;border-radius:18px;border:1px solid rgba(15,31,47,.10);background:#fff;box-shadow:none;display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center}
         .civilian-latest-card h3{margin:4px 0 2px;font-family:"Bahnschrift","Trebuchet MS",sans-serif;font-size:1.35rem;line-height:1.1;letter-spacing:-.03em}
         .civilian-latest-card p{margin:0}
+        .civilian-success-hero{background:rgba(255,255,255,.97);border-color:rgba(15,31,47,.10);overflow:hidden}
+        .civilian-success-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.88fr);gap:16px;align-items:start}
+        .civilian-success-cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:0}
+        .civilian-success-card{padding:14px 16px;border-radius:16px;background:var(--surface-alt);border:1px solid rgba(15,31,47,.08);display:grid;gap:8px;min-width:0}
+        .civilian-success-card span{font-size:.68rem;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+        .civilian-success-card strong{font-family:"Bahnschrift","Trebuchet MS",sans-serif;font-size:clamp(1.1rem,3vw,1.75rem);line-height:1.08;letter-spacing:-.04em;overflow-wrap:anywhere;word-break:break-word}
+        .civilian-success-flow{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.78fr);gap:14px;max-width:920px;margin:0 auto;width:100%}
         .civilian-report-hero{background:#fff;border-color:rgba(15,31,47,.10)}
         .civilian-report-quick-list{display:grid;grid-template-columns:repeat(2,minmax(94px,1fr));gap:10px}
         .civilian-report-quick-list span{min-height:58px;align-content:center;text-align:center;font-size:.78rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
@@ -198,8 +205,9 @@
             .mobile-quick-nav__logout{display:contents}
             .mobile-quick-nav button.is-logout{color:var(--danger)}
             .mobile-quick-nav button.is-logout span{background:rgba(199,38,38,.10);color:var(--danger)}
-            .civilian-home-grid,.report-form-shell,.civilian-simple-hero-grid,.civilian-report-hero-grid{grid-template-columns:1fr}
+            .civilian-home-grid,.report-form-shell,.civilian-simple-hero-grid,.civilian-report-hero-grid,.civilian-success-layout,.civilian-success-flow{grid-template-columns:1fr}
             .civilian-simple-stats,.civilian-home-status-row,.civilian-latest-card{grid-template-columns:1fr}
+            .civilian-success-cards{grid-template-columns:1fr}
             .civilian-four-button-grid,.civilian-three-button-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
         }
         @media (max-width:620px){
