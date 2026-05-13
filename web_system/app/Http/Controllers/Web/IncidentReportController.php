@@ -136,23 +136,11 @@ class IncidentReportController extends Controller
             'evidence' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,webp,mp4,mov,avi,3gp'],
             'evidence_photo_capture' => ['nullable', 'file', 'max:20480', 'mimes:jpg,jpeg,png,webp'],
             'evidence_video_capture' => ['nullable', 'file', 'max:20480', 'mimes:mp4,mov,avi,3gp'],
-            'selfie' => [
-                $isCivilian ? 'required_without:selfie_capture' : 'nullable',
-                'file',
-                'max:10240',
-                'mimes:jpg,jpeg,png,webp',
-            ],
-            'selfie_capture' => [
-                $isCivilian ? 'required_without:selfie' : 'nullable',
-                'file',
-                'max:10240',
-                'mimes:jpg,jpeg,png,webp',
-            ],
+            'selfie' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,webp'],
+            'selfie_capture' => ['nullable', 'file', 'max:10240', 'mimes:jpg,jpeg,png,webp'],
         ], [
             'latitude.required' => 'Lock GPS before sending the emergency report.',
             'longitude.required' => 'Lock GPS before sending the emergency report.',
-            'selfie.required_without' => 'Capture or attach a verification selfie before sending the report.',
-            'selfie_capture.required_without' => 'Capture or attach a verification selfie before sending the report.',
         ]);
 
         $validator->after(function ($validator) use ($request, $isCivilian): void {
