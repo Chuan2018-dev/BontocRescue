@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Services\AiSeverityClient;
 use App\Services\RouteNavigationClient;
 use App\Support\AiSeverityMapper;
+use App\Support\EvidencePhotoPreScreen;
 use App\Support\IncidentFeedBroadcaster;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
@@ -227,6 +228,16 @@ class IncidentReportController extends Controller
             && $evidencePath !== null
             && (bool) config('services.ai_severity.enabled', true);
 
+        if ($isCivilian && $photoEvidenceUpload !== null) {
+            $preScreen = EvidencePhotoPreScreen::inspect($photoEvidenceUpload);
+
+            if (! ($preScreen['accepted'] ?? true)) {
+                throw ValidationException::withMessages([
+                    'evidence' => $preScreen['rejection_message'] ?? EvidencePhotoPreScreen::REJECTION_MESSAGE,
+                ]);
+            }
+        }
+
         if ($isCivilian && $shouldAnalyzeImage && $photoEvidenceUpload !== null) {
             try {
                 $screening = app(AiSeverityClient::class)->analyzeUploadedEvidence($photoEvidenceUpload);
@@ -245,6 +256,12 @@ class IncidentReportController extends Controller
             } catch (ValidationException $exception) {
                 throw $exception;
             } catch (\Throwable $exception) {
+                if ((bool) config('services.ai_severity.require_civilian_photo_gate', false)) {
+                    throw ValidationException::withMessages([
+                        'evidence' => 'AI photo screening is temporarily unavailable. Please retry when the AI service is ready so dummy photos cannot pass as emergency evidence.',
+                    ]);
+                }
+
                 report($exception);
             }
         }

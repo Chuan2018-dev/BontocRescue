@@ -539,6 +539,74 @@ class AuthAndReportFlowTest extends TestCase
         Event::assertDispatched(IncidentFeedUpdated::class);
     }
 
+    public function test_civilian_web_report_submission_rejects_obvious_dummy_photo_before_ai(): void
+    {
+        Storage::fake();
+        Event::fake([IncidentFeedUpdated::class]);
+
+        $civilian = User::factory()->create([
+            'role' => 'civilian',
+            'name' => 'Dummy Photo User',
+        ]);
+
+        $this->actingAs($civilian)
+            ->from(route('reports.create'))
+            ->post(route('reports.store'), [
+                'incident_type' => 'Road Emergency',
+                'severity' => '',
+                'transmission_type' => 'online',
+                'location_text' => 'Barangay Poblacion, Bontoc',
+                'latitude' => '10.354270',
+                'longitude' => '124.970400',
+                'description' => 'Attempted report using a screenshot instead of a real scene photo.',
+                'evidence' => UploadedFile::fake()->image('dashboard-screenshot.png', 576, 1280),
+                'selfie' => UploadedFile::fake()->image('verification-selfie.jpg'),
+            ])
+            ->assertRedirect(route('reports.create'))
+            ->assertSessionHasErrors(['evidence']);
+
+        $this->assertDatabaseCount('incident_reports', 0);
+        Event::assertNotDispatched(IncidentFeedUpdated::class);
+    }
+
+    public function test_civilian_web_report_submission_requires_ai_gate_when_configured(): void
+    {
+        Storage::fake();
+        Event::fake([IncidentFeedUpdated::class]);
+        Http::fake([
+            '*' => Http::response(['message' => 'AI service unavailable'], 503),
+        ]);
+
+        config()->set('services.ai_severity.enabled', true);
+        config()->set('services.ai_severity.require_civilian_photo_gate', true);
+        config()->set('services.ai_severity.url', 'http://127.0.0.1:8100');
+
+        $civilian = User::factory()->create([
+            'role' => 'civilian',
+            'name' => 'Strict Gate User',
+        ]);
+
+        $this->actingAs($civilian)
+            ->from(route('reports.create'))
+            ->post(route('reports.store'), [
+                'incident_type' => 'Road Emergency',
+                'severity' => '',
+                'transmission_type' => 'online',
+                'location_text' => 'Barangay Poblacion, Bontoc',
+                'latitude' => '10.354270',
+                'longitude' => '124.970400',
+                'description' => 'Vehicle crash near the highway.',
+                'evidence' => UploadedFile::fake()->image('road-scene.jpg', 640, 480),
+                'selfie' => UploadedFile::fake()->image('verification-selfie.jpg'),
+            ])
+            ->assertRedirect(route('reports.create'))
+            ->assertSessionHasErrors(['evidence']);
+
+        $this->assertDatabaseCount('incident_reports', 0);
+        Event::assertNotDispatched(IncidentFeedUpdated::class);
+        Http::assertSentCount(1);
+    }
+
     public function test_civilian_report_submission_requires_photo_selfie_gps_and_description(): void
     {
         Storage::fake();

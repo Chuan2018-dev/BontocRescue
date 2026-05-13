@@ -48,6 +48,7 @@ return [
         'dispatch' => env('AI_SEVERITY_DISPATCH', 'sync'),
         'model_name' => env('AI_SEVERITY_MODEL_NAME', 'bontoc_southern_leyte_production_candidate_external'),
         'model_version' => env('AI_SEVERITY_MODEL_VERSION', '0.3.0'),
+        'require_civilian_photo_gate' => env('AI_SEVERITY_REQUIRE_CIVILIAN_PHOTO_GATE', false),
     ],
 
     'routing' => [

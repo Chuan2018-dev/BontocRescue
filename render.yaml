@@ -79,6 +79,8 @@ services:
         value: bontoc_southern_leyte_production_candidate_external
       - key: AI_SEVERITY_MODEL_VERSION
         value: "0.2.0"
+      - key: AI_SEVERITY_REQUIRE_CIVILIAN_PHOTO_GATE
+        value: "true"
       - key: BROADCAST_CONNECTION
         value: reverb
       - key: REVERB_APP_ID

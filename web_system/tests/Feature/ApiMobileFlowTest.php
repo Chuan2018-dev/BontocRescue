@@ -335,6 +335,79 @@ class ApiMobileFlowTest extends TestCase
         Http::assertSentCount(1);
     }
 
+    public function test_mobile_client_rejects_obvious_dummy_photo_before_ai(): void
+    {
+        Storage::fake();
+
+        $registerResponse = $this->postJson('/api/v1/auth/register', [
+            'name' => 'Civilian Reporter',
+            'phone' => '09179996666',
+            'email' => 'civilian.api.prescreen@example.com',
+            'password' => 'CivilianPass123!',
+            'password_confirmation' => 'CivilianPass123!',
+            'role' => 'civilian',
+        ]);
+
+        $token = $registerResponse->json('token');
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer '.$token,
+            'Accept' => 'application/json',
+        ])->post('/api/v1/reports', [
+            'incident_type' => 'Vehicular Collision',
+            'location_text' => 'National Road Junction',
+            'description' => 'Attempted upload with app UI screenshot instead of a scene photo.',
+            'transmission_type' => 'online',
+            'evidence_type' => 'photo',
+            'evidence' => UploadedFile::fake()->image('profile-screenshot.png', 576, 1280),
+            'selfie' => UploadedFile::fake()->image('verification-selfie.jpg'),
+        ])->assertStatus(422)
+          ->assertInvalid(['evidence']);
+
+        $this->assertDatabaseCount('incident_reports', 0);
+    }
+
+    public function test_mobile_client_requires_ai_photo_gate_when_configured(): void
+    {
+        Storage::fake();
+        Http::fake([
+            'http://127.0.0.1:8100/predict' => Http::response(['message' => 'Service unavailable'], 503),
+        ]);
+
+        config()->set('services.ai_severity.enabled', true);
+        config()->set('services.ai_severity.dispatch', 'sync');
+        config()->set('services.ai_severity.url', 'http://127.0.0.1:8100');
+        config()->set('services.ai_severity.require_civilian_photo_gate', true);
+
+        $registerResponse = $this->postJson('/api/v1/auth/register', [
+            'name' => 'Strict AI Civilian',
+            'phone' => '09179997777',
+            'email' => 'civilian.ai.strict@example.com',
+            'password' => 'CivilianPass123!',
+            'password_confirmation' => 'CivilianPass123!',
+            'role' => 'civilian',
+        ]);
+
+        $token = $registerResponse->json('token');
+
+        $this->withHeaders([
+            'Authorization' => 'Bearer '.$token,
+            'Accept' => 'application/json',
+        ])->post('/api/v1/reports', [
+            'incident_type' => 'Vehicular Collision',
+            'location_text' => 'National Road Junction',
+            'description' => 'Vehicle crash with a real-looking uploaded scene photo.',
+            'transmission_type' => 'online',
+            'evidence_type' => 'photo',
+            'evidence' => UploadedFile::fake()->image('road-scene.jpg', 640, 480),
+            'selfie' => UploadedFile::fake()->image('verification-selfie.jpg'),
+        ])->assertStatus(422)
+          ->assertInvalid(['evidence']);
+
+        $this->assertDatabaseCount('incident_reports', 0);
+        Http::assertSentCount(1);
+    }
+
     public function test_mobile_client_falls_back_when_ai_service_fails_for_online_photo_reports(): void
     {
         Storage::fake();
