@@ -45,7 +45,7 @@
             <div class="panel-heading">
                 <p class="panel-kicker">{{ $isCivilian ? 'Emergency Form' : 'Incident Form' }}</p>
                 <h2 class="panel-title">{{ $isCivilian ? 'Field actions' : 'Emergency details' }}</h2>
-                <p class="section-copy">{{ $isCivilian ? 'Use photo, optional video, and GPS first. Selfie verification opens when you tap Send Report.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
+                <p class="section-copy">{{ $isCivilian ? 'Use photo, optional video, and GPS first. Front-camera selfie verification opens when you tap Send Report.' : 'Fill out the operational fields below to submit a new incident from the web dashboard.' }}</p>
             </div>
         </div>
 
@@ -61,7 +61,7 @@
                     <section class="form-step-card civilian-capture-panel">
                         <span class="form-step-label">Emergency Report</span>
                         <strong>Use these field actions.</strong>
-                        <p class="civilian-mobile-hint">Photo, GPS, and description are required first. Video is optional. Selfie verification opens after Send Report.</p>
+                        <p class="civilian-mobile-hint">Photo, GPS, and description are required first. Video is optional. Front-camera selfie verification opens after Send Report.</p>
 
                         <input type="file" name="evidence_photo_capture" accept="image/*" capture="environment" hidden data-capture-photo-input>
                         <input type="file" name="evidence_video_capture" accept="video/*" capture="environment" hidden data-capture-video-input>
@@ -128,6 +128,26 @@
                             </div>
                         </details>
 
+                        <div class="selfie-camera-modal" data-selfie-camera-modal role="dialog" aria-modal="true" aria-labelledby="selfieVerificationTitle" hidden>
+                            <div class="selfie-camera-sheet">
+                                <div class="selfie-camera-copy">
+                                    <span class="tag blue">Identity check</span>
+                                    <h3 id="selfieVerificationTitle">Front-camera selfie verification</h3>
+                                    <p data-selfie-camera-status>Opening the front camera so responders can verify who sent the report.</p>
+                                </div>
+                                <div class="selfie-camera-frame">
+                                    <video data-selfie-camera-preview autoplay muted playsinline></video>
+                                    <canvas data-selfie-camera-canvas hidden></canvas>
+                                </div>
+                                <div class="button-row selfie-camera-actions">
+                                    <button type="button" class="btn btn-primary" data-selfie-camera-capture>Capture Verification Selfie</button>
+                                    <button type="button" class="btn btn-secondary" data-selfie-camera-retry hidden>Retry Front Camera</button>
+                                    <button type="button" class="btn btn-secondary" data-selfie-camera-fallback>Open Phone Camera Instead</button>
+                                    <button type="button" class="btn btn-danger" data-selfie-camera-cancel>Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="detail-card inline-warning-card" data-evidence-preview-warning-card hidden data-warning-tone="amber">
                             <div class="tag-row">
                                 <span class="tag amber" data-evidence-preview-warning-tag>Preview check</span>
@@ -154,7 +174,7 @@
 
                     <section class="form-step-card report-submit-card civilian-send-card">
                         <strong>Send when complete.</strong>
-                        <p>Tap Send Report after photo, GPS, and description. The phone will ask for a verification selfie before final submit.</p>
+                        <p>Tap Send Report after photo, GPS, and description. The system will request a front-camera verification selfie before final submit.</p>
                         <button class="btn btn-primary" type="submit" data-draft-submit data-report-submit>Send Report</button>
                     </section>
                 </div>

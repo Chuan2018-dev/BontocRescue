@@ -130,6 +130,15 @@
         .civilian-send-card p{color:var(--muted)}
         .civilian-send-card .btn{width:100%}
         .visually-hidden-control{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+        .selfie-camera-modal[hidden]{display:none}
+        .selfie-camera-modal{position:fixed;inset:0;z-index:1700;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(15,31,47,.82);backdrop-filter:blur(16px)}
+        .selfie-camera-sheet{width:min(520px,100%);max-height:calc(100vh - 36px);overflow:auto;padding:18px;border-radius:28px;background:#fff;border:1px solid rgba(255,255,255,.24);box-shadow:var(--shadow);display:grid;gap:14px}
+        .selfie-camera-copy{display:grid;gap:8px}
+        .selfie-camera-copy h3{margin:0;font-family:"Bahnschrift","Trebuchet MS",sans-serif;font-size:1.55rem;line-height:1.08;letter-spacing:-.04em}
+        .selfie-camera-copy p{margin:0;color:var(--muted);line-height:1.55}
+        .selfie-camera-frame{position:relative;overflow:hidden;border-radius:24px;background:#071523;border:1px solid rgba(15,31,47,.12);aspect-ratio:3/4}
+        .selfie-camera-frame video{display:block;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+        .selfie-camera-actions{display:grid;grid-template-columns:1fr;gap:10px}
         .report-form-shell{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(280px,.85fr);gap:20px}
         .report-form-main,.report-form-side,.capture-helper-grid{display:grid;gap:16px}
         .form-step-card{background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(242,248,255,.96))}

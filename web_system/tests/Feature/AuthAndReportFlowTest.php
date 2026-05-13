@@ -392,12 +392,16 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('Record Video')
             ->assertSee('Lock GPS')
             ->assertSee('Short Description')
-            ->assertSee('Selfie verification opens after Send Report.')
+            ->assertSee('Front-camera selfie verification opens after Send Report.')
+            ->assertSee('Front-camera selfie verification')
             ->assertSee('Tap Send Report after photo, GPS, and description.')
             ->assertSee('data-report-draft-form', false)
             ->assertSee('data-capture-trigger="photo"', false)
             ->assertSee('data-capture-trigger="video"', false)
             ->assertSee('data-capture-selfie-input', false)
+            ->assertSee('data-selfie-camera-modal', false)
+            ->assertSee('data-selfie-camera-preview', false)
+            ->assertSee('data-selfie-camera-capture', false)
             ->assertDontSee('data-capture-trigger="selfie"', false)
             ->assertSee('data-capture-trigger="gps"', false)
             ->assertSee('data-geo-fill-button', false)
@@ -1847,5 +1851,4 @@ class AuthAndReportFlowTest extends TestCase
             ->assertRedirect(route('dashboard'));
     }
 }
-
 

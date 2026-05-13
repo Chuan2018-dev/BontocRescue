@@ -44,6 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const warningDismissTrigger = root.querySelector('[data-warning-dismiss-trigger]');
     const selfiePreviewImage = root.querySelector('[data-selfie-preview-image]');
     const selfiePreviewName = root.querySelector('[data-selfie-preview-name]');
+    const selfieCameraModal = root.querySelector('[data-selfie-camera-modal]');
+    const selfieCameraPreview = root.querySelector('[data-selfie-camera-preview]');
+    const selfieCameraCanvas = root.querySelector('[data-selfie-camera-canvas]');
+    const selfieCameraStatus = root.querySelector('[data-selfie-camera-status]');
+    const selfieCameraCaptureButton = root.querySelector('[data-selfie-camera-capture]');
+    const selfieCameraRetryButton = root.querySelector('[data-selfie-camera-retry]');
+    const selfieCameraFallbackButton = root.querySelector('[data-selfie-camera-fallback]');
+    const selfieCameraCancelButton = root.querySelector('[data-selfie-camera-cancel]');
     const evidenceBadge = root.querySelector('[data-capture-badge="evidence"]');
     const videoBadge = root.querySelector('[data-capture-badge="video"]');
     const selfieBadge = root.querySelector('[data-capture-badge="selfie"]');
@@ -57,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let evidencePreviewUrl = null;
     let selfiePreviewUrl = null;
+    let selfieCameraStream = null;
     let evidenceInspectionToken = 0;
     let pendingSubmitAfterSelfie = false;
 
@@ -342,11 +351,105 @@ document.addEventListener('DOMContentLoaded', () => {
         return readyForSelfieGate;
     };
 
-    const openSelfieVerification = () => {
-        pendingSubmitAfterSelfie = true;
+    const setSelfieCameraStatus = (message) => {
+        if (selfieCameraStatus) {
+            selfieCameraStatus.textContent = message;
+        }
+    };
+
+    const showSelfieCameraModal = () => {
+        if (selfieCameraModal instanceof HTMLElement) {
+            selfieCameraModal.hidden = false;
+        }
+    };
+
+    const hideSelfieCameraModal = () => {
+        if (selfieCameraModal instanceof HTMLElement) {
+            selfieCameraModal.hidden = true;
+        }
+    };
+
+    const stopSelfieCamera = () => {
+        if (selfieCameraStream) {
+            selfieCameraStream.getTracks().forEach((track) => track.stop());
+            selfieCameraStream = null;
+        }
+
+        if (selfieCameraPreview instanceof HTMLVideoElement) {
+            selfieCameraPreview.pause();
+            selfieCameraPreview.srcObject = null;
+        }
+    };
+
+    const canUseDirectCamera = () => {
+        const host = window.location.hostname;
+        const isLocalhost = ['localhost', '127.0.0.1'].includes(host);
+
+        return Boolean(navigator.mediaDevices?.getUserMedia) && (window.isSecureContext || isLocalhost);
+    };
+
+    const requestFrontCameraStream = async () => {
+        const preferredConstraints = {
+            audio: false,
+            video: {
+                facingMode: { exact: 'user' },
+                width: { ideal: 720 },
+                height: { ideal: 960 },
+            },
+        };
+
+        try {
+            return await navigator.mediaDevices.getUserMedia(preferredConstraints);
+        } catch {
+            return navigator.mediaDevices.getUserMedia({
+                audio: false,
+                video: {
+                    facingMode: { ideal: 'user' },
+                    width: { ideal: 720 },
+                    height: { ideal: 960 },
+                },
+            });
+        }
+    };
+
+    const assignSelfieFile = (file) => {
+        if (!(selfieCaptureInput instanceof HTMLInputElement) || !(file instanceof File) || typeof DataTransfer === 'undefined') {
+            return false;
+        }
+
+        try {
+            const transfer = new DataTransfer();
+            transfer.items.add(file);
+            selfieCaptureInput.files = transfer.files;
+            clearInputFile(selfieInput);
+            return true;
+        } catch {
+            return false;
+        }
+    };
+
+    const canvasToJpegBlob = (canvas) => new Promise((resolve) => {
+        if (typeof canvas.toBlob === 'function') {
+            canvas.toBlob(resolve, 'image/jpeg', 0.88);
+            return;
+        }
+
+        try {
+            fetch(canvas.toDataURL('image/jpeg', 0.88))
+                .then((response) => response.blob())
+                .then(resolve)
+                .catch(() => resolve(null));
+        } catch {
+            resolve(null);
+        }
+    });
+
+    const openPhoneSelfieFallback = () => {
+        stopSelfieCamera();
+        hideSelfieCameraModal();
 
         if (submitStatus) {
-            submitStatus.textContent = 'Opening selfie verification. Capture your face clearly to submit the report.';
+            submitStatus.textContent = 'Opening phone camera for selfie verification.';
         }
 
         if (selfieCaptureInput instanceof HTMLInputElement) {
@@ -355,6 +458,132 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         selfieInput?.click();
+    };
+
+    const startFrontSelfieCamera = async () => {
+        if (!(selfieCameraPreview instanceof HTMLVideoElement) || !(selfieCameraModal instanceof HTMLElement)) {
+            return false;
+        }
+
+        if (!canUseDirectCamera()) {
+            setSelfieCameraStatus('This browser requires HTTPS for direct front-camera preview. Opening the phone camera instead.');
+            return false;
+        }
+
+        showSelfieCameraModal();
+        stopSelfieCamera();
+        setSelfieCameraStatus('Requesting the front camera. Please allow camera access if the browser asks.');
+
+        if (selfieCameraCaptureButton instanceof HTMLButtonElement) {
+            selfieCameraCaptureButton.disabled = true;
+        }
+
+        if (selfieCameraRetryButton instanceof HTMLButtonElement) {
+            selfieCameraRetryButton.hidden = true;
+        }
+
+        try {
+            selfieCameraStream = await requestFrontCameraStream();
+            selfieCameraPreview.srcObject = selfieCameraStream;
+
+            const playAttempt = selfieCameraPreview.play();
+            if (playAttempt instanceof Promise) {
+                await playAttempt;
+            }
+
+            setSelfieCameraStatus('Front camera is ready. Center your face, then capture the verification selfie.');
+
+            if (selfieCameraCaptureButton instanceof HTMLButtonElement) {
+                selfieCameraCaptureButton.disabled = false;
+            }
+
+            return true;
+        } catch {
+            stopSelfieCamera();
+            setSelfieCameraStatus('The browser could not open the front camera directly. You can retry or use the phone camera fallback.');
+
+            if (selfieCameraRetryButton instanceof HTMLButtonElement) {
+                selfieCameraRetryButton.hidden = false;
+            }
+
+            if (selfieCameraCaptureButton instanceof HTMLButtonElement) {
+                selfieCameraCaptureButton.disabled = true;
+            }
+
+            return true;
+        }
+    };
+
+    const captureFrontSelfie = async () => {
+        if (!(selfieCameraPreview instanceof HTMLVideoElement) || !(selfieCameraCanvas instanceof HTMLCanvasElement)) {
+            openPhoneSelfieFallback();
+            return;
+        }
+
+        const width = selfieCameraPreview.videoWidth;
+        const height = selfieCameraPreview.videoHeight;
+
+        if (!width || !height) {
+            setSelfieCameraStatus('Front camera preview is not ready yet. Please wait a moment, then try again.');
+            return;
+        }
+
+        selfieCameraCanvas.width = width;
+        selfieCameraCanvas.height = height;
+
+        const context = selfieCameraCanvas.getContext('2d');
+        if (!context) {
+            openPhoneSelfieFallback();
+            return;
+        }
+
+        context.save();
+        context.translate(width, 0);
+        context.scale(-1, 1);
+        context.drawImage(selfieCameraPreview, 0, 0, width, height);
+        context.restore();
+
+        const blob = await canvasToJpegBlob(selfieCameraCanvas);
+
+        if (!(blob instanceof Blob)) {
+            openPhoneSelfieFallback();
+            return;
+        }
+
+        let selfieFile = null;
+        try {
+            selfieFile = new File([blob], `verification-selfie-${Date.now()}.jpg`, {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+            });
+        } catch {
+            openPhoneSelfieFallback();
+            return;
+        }
+
+        if (!assignSelfieFile(selfieFile)) {
+            openPhoneSelfieFallback();
+            return;
+        }
+
+        updateSelfiePreview(selfieFile);
+        stopSelfieCamera();
+        hideSelfieCameraModal();
+        submitAfterSelfieVerification();
+    };
+
+    const openSelfieVerification = async () => {
+        pendingSubmitAfterSelfie = true;
+
+        if (submitStatus) {
+            submitStatus.textContent = 'Opening front-camera selfie verification. Capture your face clearly to submit the report.';
+        }
+
+        if (await startFrontSelfieCamera()) {
+            return;
+        }
+
+        openPhoneSelfieFallback();
     };
 
     const submitAfterSelfieVerification = () => {
@@ -569,12 +798,34 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (trigger === 'video') {
                 videoCaptureInput?.click();
             } else if (trigger === 'selfie') {
-                selfieCaptureInput?.click();
+                void openSelfieVerification();
             } else if (trigger === 'gps') {
                 gpsFocusButton?.blur();
                 geoButton?.click();
             }
         });
+    });
+
+    selfieCameraCaptureButton?.addEventListener('click', () => {
+        void captureFrontSelfie();
+    });
+
+    selfieCameraRetryButton?.addEventListener('click', () => {
+        void startFrontSelfieCamera();
+    });
+
+    selfieCameraFallbackButton?.addEventListener('click', () => {
+        openPhoneSelfieFallback();
+    });
+
+    selfieCameraCancelButton?.addEventListener('click', () => {
+        pendingSubmitAfterSelfie = false;
+        stopSelfieCamera();
+        hideSelfieCameraModal();
+
+        if (submitStatus) {
+            submitStatus.textContent = 'Selfie verification was cancelled. Tap Send Report when you are ready to verify.';
+        }
     });
 
     photoCaptureInput?.addEventListener('change', () => {
@@ -645,13 +896,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!hasRequiredSelfie()) {
             event.preventDefault();
-            openSelfieVerification();
+            void openSelfieVerification();
         }
     });
 
     updateCivilianReadiness();
 
     window.addEventListener('beforeunload', () => {
+        stopSelfieCamera();
         revokePreviewUrl(evidencePreviewUrl);
         revokePreviewUrl(selfiePreviewUrl);
     });
