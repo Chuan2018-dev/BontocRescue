@@ -48,11 +48,68 @@ def _label_counts(labels: tuple[str, ...], targets: list[str]) -> dict[str, int]
 
 
 
-def _evaluate(model: nn.Module, loader: DataLoader, criterion: nn.Module, device: torch.device) -> dict[str, float]:
+def _build_classification_breakdown(
+    labels: tuple[str, ...],
+    true_indices: list[int],
+    predicted_indices: list[int],
+) -> dict[str, object]:
+    confusion_matrix = {
+        true_label: {predicted_label: 0 for predicted_label in labels}
+        for true_label in labels
+    }
+
+    for true_index, predicted_index in zip(true_indices, predicted_indices):
+        confusion_matrix[labels[true_index]][labels[predicted_index]] += 1
+
+    per_class: dict[str, dict[str, float | int]] = {}
+    precision_values: list[float] = []
+    recall_values: list[float] = []
+    f1_values: list[float] = []
+
+    for label in labels:
+        true_positive = confusion_matrix[label][label]
+        support = sum(confusion_matrix[label].values())
+        predicted_total = sum(confusion_matrix[true_label][label] for true_label in labels)
+        precision = true_positive / predicted_total if predicted_total else 0.0
+        recall = true_positive / support if support else 0.0
+        f1 = (2 * precision * recall / (precision + recall)) if (precision + recall) else 0.0
+
+        precision_values.append(precision)
+        recall_values.append(recall)
+        f1_values.append(f1)
+
+        per_class[label] = {
+            "support": support,
+            "correct": true_positive,
+            "accuracy": recall,
+            "precision": precision,
+            "recall": recall,
+            "f1": f1,
+        }
+
+    label_count = len(labels) or 1
+    return {
+        "per_class": per_class,
+        "confusion_matrix": confusion_matrix,
+        "macro_precision": sum(precision_values) / label_count,
+        "macro_recall": sum(recall_values) / label_count,
+        "macro_f1": sum(f1_values) / label_count,
+    }
+
+
+def _evaluate(
+    model: nn.Module,
+    loader: DataLoader,
+    criterion: nn.Module,
+    device: torch.device,
+    labels: tuple[str, ...] | None = None,
+) -> dict[str, object]:
     model.eval()
     total_loss = 0.0
     total_correct = 0
     total_samples = 0
+    true_indices: list[int] = []
+    predicted_indices: list[int] = []
 
     with torch.no_grad():
         for images, targets, _ in loader:
@@ -66,14 +123,27 @@ def _evaluate(model: nn.Module, loader: DataLoader, criterion: nn.Module, device
             predictions = torch.argmax(logits, dim=1)
             total_correct += (predictions == targets).sum().item()
             total_samples += targets.size(0)
+            true_indices.extend(int(value) for value in targets.cpu().tolist())
+            predicted_indices.extend(int(value) for value in predictions.cpu().tolist())
 
     if total_samples == 0:
         return {"loss": 0.0, "accuracy": 0.0}
 
-    return {
+    metrics: dict[str, object] = {
         "loss": total_loss / total_samples,
         "accuracy": total_correct / total_samples,
     }
+
+    if labels is not None:
+        metrics.update(
+            _build_classification_breakdown(
+                labels=labels,
+                true_indices=true_indices,
+                predicted_indices=predicted_indices,
+            )
+        )
+
+    return metrics
 
 
 
@@ -185,7 +255,13 @@ def train(config: AppConfig) -> dict[str, object]:
             "loss": (running_loss / running_samples) if running_samples else 0.0,
             "accuracy": (running_correct / running_samples) if running_samples else 0.0,
         }
-        val_metrics = _evaluate(model=model, loader=val_loader, criterion=criterion, device=device)
+        val_metrics = _evaluate(
+            model=model,
+            loader=val_loader,
+            criterion=criterion,
+            device=device,
+            labels=config.experiment.labels,
+        )
 
         history.append(
             {
@@ -197,8 +273,9 @@ def train(config: AppConfig) -> dict[str, object]:
             }
         )
 
-        if val_metrics["accuracy"] >= best_val_accuracy:
-            best_val_accuracy = val_metrics["accuracy"]
+        val_accuracy = float(val_metrics["accuracy"])
+        if val_accuracy >= best_val_accuracy:
+            best_val_accuracy = val_accuracy
             torch.save(
                 {
                     "model_state_dict": model.state_dict(),
@@ -215,7 +292,13 @@ def train(config: AppConfig) -> dict[str, object]:
 
     best_checkpoint = torch.load(config.outputs.best_checkpoint_path, map_location=device, weights_only=False)
     model.load_state_dict(best_checkpoint["model_state_dict"])
-    test_metrics = _evaluate(model=model, loader=test_loader, criterion=criterion, device=device)
+    test_metrics = _evaluate(
+        model=model,
+        loader=test_loader,
+        criterion=criterion,
+        device=device,
+        labels=config.experiment.labels,
+    )
 
     train_label_counts = _label_counts(config.experiment.labels, _extract_targets(train_records))
     val_label_counts = _label_counts(config.experiment.labels, _extract_targets(val_records))
