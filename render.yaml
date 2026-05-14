@@ -132,6 +132,8 @@ services:
         value: "true"
       - key: AI_PRELOAD_MODELS_REQUIRED
         value: "false"
+      - key: AI_RELEVANCE_SEVERITY_OVERRIDE_THRESHOLD
+        value: "0.70"
       - key: AI_SEVERITY_CHECKPOINT_URL
         sync: false
       - key: AI_SEVERITY_CHECKPOINT_SHA256

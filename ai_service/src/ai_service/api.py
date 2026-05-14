@@ -43,6 +43,17 @@ def truthy_env(name: str, default: bool = False) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def float_env(name: str, default: float) -> float:
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
 def severity_predictor() -> SeverityPredictor:
     global PREDICTOR
 
@@ -124,33 +135,46 @@ async def predict(file: UploadFile = File(...)) -> dict[str, object]:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
 
     photo_gate = relevance_predictor()
+    relevance_overridden = False
     if photo_gate is not None:
         relevance = photo_gate.predict_bytes(file_bytes)
         if not relevance.accepted:
-            return {
-                "filename": file.filename,
-                "accepted": False,
-                "photo_relevance_label": relevance.label,
-                "photo_relevance_confidence": round(relevance.confidence, 6),
-                "photo_relevance_probabilities": relevance.probabilities,
-                "rejection_message": relevance.rejection_message,
-                "responder_review_required": relevance.responder_review_required,
-                "responder_review_action": relevance.responder_review_action,
-                "severity": None,
-                "confidence": 0.0,
-                "probabilities": {},
-            }
+            predictor = severity_predictor()
+            prediction = predictor.predict_bytes(file_bytes)
+            override_threshold = float_env("AI_RELEVANCE_SEVERITY_OVERRIDE_THRESHOLD", 0.70)
+
+            if prediction.confidence >= override_threshold and not prediction.responder_review_required:
+                relevance_overridden = True
+            else:
+                return {
+                    "filename": file.filename,
+                    "accepted": False,
+                    "photo_relevance_label": relevance.label,
+                    "photo_relevance_confidence": round(relevance.confidence, 6),
+                    "photo_relevance_probabilities": relevance.probabilities,
+                    "photo_relevance_overridden": False,
+                    "rejection_message": relevance.rejection_message,
+                    "responder_review_required": relevance.responder_review_required,
+                    "responder_review_action": relevance.responder_review_action,
+                    "severity": None,
+                    "confidence": 0.0,
+                    "probabilities": {},
+                }
+        else:
+            predictor = severity_predictor()
+            prediction = predictor.predict_bytes(file_bytes)
     else:
         relevance = None
+        predictor = severity_predictor()
+        prediction = predictor.predict_bytes(file_bytes)
 
-    predictor = severity_predictor()
-    prediction = predictor.predict_bytes(file_bytes)
     return {
         "filename": file.filename,
         "accepted": True,
         "photo_relevance_label": relevance.label if relevance is not None else "related",
         "photo_relevance_confidence": round(relevance.confidence, 6) if relevance is not None else None,
         "photo_relevance_probabilities": relevance.probabilities if relevance is not None else {},
+        "photo_relevance_overridden": relevance_overridden,
         "rejection_message": None,
         "severity": prediction.severity,
         "confidence": round(prediction.confidence, 6),
