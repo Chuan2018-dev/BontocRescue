@@ -45,6 +45,8 @@ return [
             .env('AI_SEVERITY_SERVICE_PORT', '8100')
         ),
         'timeout' => (int) env('AI_SEVERITY_TIMEOUT', 20),
+        'retry_attempts' => (int) env('AI_SEVERITY_RETRY_ATTEMPTS', 1),
+        'retry_delay_ms' => (int) env('AI_SEVERITY_RETRY_DELAY_MS', 1500),
         'dispatch' => env('AI_SEVERITY_DISPATCH', 'sync'),
         'model_name' => env('AI_SEVERITY_MODEL_NAME', 'bontoc_southern_leyte_production_candidate_external'),
         'model_version' => env('AI_SEVERITY_MODEL_VERSION', '0.3.0'),

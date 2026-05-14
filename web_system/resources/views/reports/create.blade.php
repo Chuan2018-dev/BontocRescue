@@ -49,7 +49,7 @@
             </div>
         </div>
 
-        @if ($errors->any())
+        @if ($errors->any() && ! $isCivilian)
             <div class="flash error">{{ $errors->first() }}</div>
         @endif
 

@@ -124,7 +124,7 @@ class IncidentReportApiController extends Controller
             } catch (\Throwable $exception) {
                 if ((bool) config('services.ai_severity.require_civilian_photo_gate', false)) {
                     throw ValidationException::withMessages([
-                        'evidence' => 'AI photo screening is temporarily unavailable. Please retry when the AI service is ready so dummy photos cannot pass as emergency evidence.',
+                        'evidence' => 'AI photo checker is warming up. Please wait a few seconds and tap Send Report again. This protects the system from dummy or unrelated photos.',
                     ]);
                 }
 

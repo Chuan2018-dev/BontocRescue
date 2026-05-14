@@ -94,9 +94,37 @@ class AiSeverityClient
 
     private function requestPrediction(string $fileBytes, string $filename): array
     {
-        $response = Http::timeout((int) config('services.ai_severity.timeout', 20))
-            ->attach('file', $fileBytes, $filename)
-            ->post(rtrim((string) config('services.ai_severity.url', 'http://127.0.0.1:8100'), '/').'/predict');
+        $attempts = max(1, (int) config('services.ai_severity.retry_attempts', 1));
+        $retryDelayMs = max(0, (int) config('services.ai_severity.retry_delay_ms', 1500));
+        $endpoint = rtrim((string) config('services.ai_severity.url', 'http://127.0.0.1:8100'), '/').'/predict';
+        $lastException = null;
+        $response = null;
+
+        for ($attempt = 1; $attempt <= $attempts; $attempt++) {
+            try {
+                $response = Http::timeout((int) config('services.ai_severity.timeout', 20))
+                    ->attach('file', $fileBytes, $filename)
+                    ->post($endpoint);
+
+                if ($response->successful() || ! $this->shouldRetryResponse($response->status(), $attempt, $attempts)) {
+                    break;
+                }
+            } catch (\Throwable $exception) {
+                $lastException = $exception;
+
+                if ($attempt >= $attempts) {
+                    throw $exception;
+                }
+            }
+
+            if ($attempt < $attempts && $retryDelayMs > 0) {
+                usleep($retryDelayMs * 1000);
+            }
+        }
+
+        if ($response === null) {
+            throw $lastException ?? new RuntimeException('AI service did not return a response.');
+        }
 
         $response->throw();
 
@@ -107,5 +135,17 @@ class AiSeverityClient
         }
 
         return $payload;
+    }
+
+    private function shouldRetryResponse(int $status, int $attempt, int $attempts): bool
+    {
+        if ($attempt >= $attempts) {
+            return false;
+        }
+
+        return $status === 408
+            || $status === 425
+            || $status === 429
+            || $status >= 500;
     }
 }

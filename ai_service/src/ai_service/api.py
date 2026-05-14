@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import os
+import sys
+
 from fastapi import FastAPI, File, HTTPException, UploadFile
 
 from .checkpoint_sync import is_usable_checkpoint
@@ -32,6 +35,14 @@ PREDICTOR: SeverityPredictor | None = None
 RELEVANCE_PREDICTOR: PhotoRelevancePredictor | None = None
 
 
+def truthy_env(name: str, default: bool = False) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 def severity_predictor() -> SeverityPredictor:
     global PREDICTOR
 
@@ -56,6 +67,31 @@ def relevance_predictor() -> PhotoRelevancePredictor | None:
     return RELEVANCE_PREDICTOR
 
 
+def warm_predictors() -> dict[str, object]:
+    photo_gate = relevance_predictor()
+    predictor = severity_predictor()
+
+    return {
+        "status": "ready",
+        "severity_predictor_loaded": predictor is not None,
+        "photo_relevance_predictor_loaded": photo_gate is not None,
+    }
+
+
+@app.on_event("startup")
+def preload_models() -> None:
+    if not truthy_env("AI_PRELOAD_MODELS", default=False):
+        return
+
+    try:
+        warm_predictors()
+    except Exception as exc:
+        print(f"[ai-service] model preload failed: {exc}", file=sys.stderr, flush=True)
+
+        if truthy_env("AI_PRELOAD_MODELS_REQUIRED", default=False):
+            raise
+
+
 @app.get("/health")
 def health() -> dict[str, object]:
     return {
@@ -76,10 +112,13 @@ def health() -> dict[str, object]:
     }
 
 
+@app.get("/warmup")
+def warmup() -> dict[str, object]:
+    return warm_predictors()
+
+
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)) -> dict[str, object]:
-    predictor = severity_predictor()
-
     file_bytes = await file.read()
     if not file_bytes:
         raise HTTPException(status_code=400, detail="Uploaded file is empty.")
@@ -104,6 +143,7 @@ async def predict(file: UploadFile = File(...)) -> dict[str, object]:
     else:
         relevance = None
 
+    predictor = severity_predictor()
     prediction = predictor.predict_bytes(file_bytes)
     return {
         "filename": file.filename,

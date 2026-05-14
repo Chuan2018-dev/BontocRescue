@@ -65,6 +65,10 @@ services:
         value: https://stitch-ai-demo.onrender.com
       - key: AI_SEVERITY_TIMEOUT
         value: "60"
+      - key: AI_SEVERITY_RETRY_ATTEMPTS
+        value: "2"
+      - key: AI_SEVERITY_RETRY_DELAY_MS
+        value: "1500"
       - key: AI_SEVERITY_DISPATCH
         value: sync
       - key: AI_SEVERITY_MODEL_NAME
@@ -124,6 +128,10 @@ services:
         value: "false"
       - key: AI_CHECKPOINT_DOWNLOAD_TIMEOUT
         value: "120"
+      - key: AI_PRELOAD_MODELS
+        value: "true"
+      - key: AI_PRELOAD_MODELS_REQUIRED
+        value: "false"
       - key: AI_SEVERITY_CHECKPOINT_URL
         sync: false
       - key: AI_SEVERITY_CHECKPOINT_SHA256
