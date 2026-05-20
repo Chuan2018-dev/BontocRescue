@@ -1554,6 +1554,9 @@ class AuthAndReportFlowTest extends TestCase
             ->assertSee('Live incident monitoring')
             ->assertSee('Split View')
             ->assertSee('Alert Queue')
+            ->assertDontSee('LoRa Status')
+            ->assertDontSee('Active incidents')
+            ->assertDontSee('Assigned to you')
             ->assertDontSee('Admin Control Center')
             ->assertDontSee('Manage Civilian Accounts');
     }

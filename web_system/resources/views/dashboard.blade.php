@@ -75,7 +75,7 @@
 @section('title', $isCivilian ? 'Civilian Dashboard' : 'Responder Dashboard')
 @section('page_label', $isCivilian ? 'Civilian Dashboard' : 'Monitoring')
 @section('page_heading', $isCivilian ? 'Civilian Home' : 'Live Incident Feed')
-@section('page_subheading', $isCivilian ? 'Direct access to report an emergency and check your latest status.' : 'Clean, responder-friendly monitoring for live incidents, dispatch priorities, and field communication status.')
+@section('page_subheading', $isCivilian ? 'Direct access to report an emergency and check your latest status.' : 'Clean, responder-friendly monitoring for live incidents and dispatch priorities.')
 
 @section('hero')
     @if ($isCivilian)
@@ -98,26 +98,20 @@
             </div>
         </section>
     @else
-        <section class="hero-card">
+        <section class="hero-card responder-lean-hero">
             <div class="hero-grid">
                 <div class="hero-copy">
                     <p class="eyebrow">Responder Command Deck</p>
-                    <h2>Monitor incoming incidents, prioritize severity, and coordinate response without losing live context.</h2>
+                    <h2>Monitor incidents, prioritize severity, and coordinate response without extra dashboard clutter.</h2>
                     <p>
-                        Logged in as <strong>{{ $user?->name }}</strong>. The monitoring page is now cleaner and more task-focused:
-                        first the current workload, then the live queue, then dispatch and connectivity guidance.
+                        Logged in as <strong>{{ $user?->name }}</strong>. Start with the live queue, switch to map only when
+                        location context matters, and open the full incident feed when you need deeper review.
                     </p>
                     <div class="hero-actions">
                         <a href="{{ route('reports.index') }}" class="btn btn-primary">Open Full Incident Feed</a>
                         <a href="{{ route('reports.create') }}" class="btn btn-secondary">Create Manual Report</a>
                         <button type="button" class="btn btn-secondary" data-enable-live-alerts>Enable Live Alerts</button>
                     </div>
-                </div>
-                <div class="hero-metrics">
-                    <article class="metric-card"><span>Active incidents</span><strong data-live-stat="active">{{ $stats['active'] }}</strong><p>Current open queue requiring field awareness.</p></article>
-                    <article class="metric-card"><span>Assigned to you</span><strong>{{ $stats['assigned_to_me'] }}</strong><p>Incidents already aligned to your responder account.</p></article>
-                    <article class="metric-card"><span>Fatal alerts</span><strong data-live-stat="fatal">{{ $stats['fatal'] }}</strong><p>Priority one cases demanding rapid dispatch support.</p></article>
-                    <article class="metric-card"><span>Today / LoRa</span><strong data-live-stat="today">{{ $stats['today'] }}</strong><p>{{ $stats['lora_active'] }} fallback reports transmitted over LoRa today.</p></article>
                 </div>
             </div>
         </section>
@@ -191,29 +185,6 @@
             </section>
         </section>
     @else
-        <section class="summary-strip">
-            <article class="summary-card">
-                <span>Active incidents</span>
-                <strong data-live-stat="active">{{ $stats['active'] }}</strong>
-                <p>Open reports that still need responder attention.</p>
-            </article>
-            <article class="summary-card">
-                <span>Assigned to you</span>
-                <strong>{{ $stats['assigned_to_me'] }}</strong>
-                <p>Incidents currently aligned to your responder account.</p>
-            </article>
-            <article class="summary-card">
-                <span>Fatal alerts</span>
-                <strong data-live-stat="fatal">{{ $stats['fatal'] }}</strong>
-                <p>Highest-priority cases that need quick action.</p>
-            </article>
-            <article class="summary-card">
-                <span>LoRa today</span>
-                <strong>{{ $stats['lora_active'] }}</strong>
-                <p>Fallback transmissions received through the mesh network today.</p>
-            </article>
-        </section>
-
         <section class="workspace-grid">
             <article class="panel">
                 <div class="panel-toolbar">
