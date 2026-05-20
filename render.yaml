@@ -131,9 +131,13 @@ services:
       - key: AI_CHECKPOINT_DOWNLOAD_TIMEOUT
         value: "120"
       - key: AI_PRELOAD_MODELS
-        value: "true"
+        value: "false"
       - key: AI_PRELOAD_MODELS_REQUIRED
         value: "false"
+      - key: AI_SINGLE_MODEL_CACHE
+        value: "true"
+      - key: AI_UNLOAD_AFTER_PREDICT
+        value: "true"
       - key: AI_RELEVANCE_SEVERITY_OVERRIDE_THRESHOLD
         value: "0.70"
       - key: AI_SEVERITY_CHECKPOINT_URL
