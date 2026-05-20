@@ -3,40 +3,18 @@
 @section('title', 'Civilian Accounts')
 @section('page_label', 'Responder Access Control')
 @section('page_heading', 'Civilian Accounts')
-@section('page_subheading', 'Responder-side account updates, block control, delete access, search tools, and device visibility for civilian users.')
+@section('page_subheading', 'Search, update, block, delete, and audit civilian accounts from a cleaner responder workspace.')
 
 @section('hero')
-    <section class="hero-card">
+    <section class="hero-card responder-lean-hero">
         <div class="hero-grid">
             <div class="hero-copy">
                 <p class="eyebrow">Responder-side Access Desk</p>
-                <h2>Manage civilian access, suspend risky accounts, and trace responder actions from one clean command panel.</h2>
+                <h2>Manage civilian access without extra dashboard clutter.</h2>
                 <p>
-                    This responder-only page now supports full civilian account maintenance: update identity details, reset passwords,
-                    block or unblock access, delete old accounts, search the civilian directory quickly, and review the latest audit trail.
+                    Search the directory, update identity details, reset passwords, block or unblock access,
+                    delete old accounts, and review the latest audit trail when needed.
                 </p>
-            </div>
-            <div class="hero-metrics">
-                <article class="metric-card">
-                    <span>Civilian Accounts</span>
-                    <strong>{{ $stats['civilian_accounts'] ?? 0 }}</strong>
-                    <p>Total civilian profiles currently available for responder-side support.</p>
-                </article>
-                <article class="metric-card">
-                    <span>Filtered View</span>
-                    <strong>{{ $stats['filtered_accounts'] ?? 0 }}</strong>
-                    <p>Accounts matching the current search and filter options.</p>
-                </article>
-                <article class="metric-card">
-                    <span>Blocked</span>
-                    <strong>{{ $stats['blocked_accounts'] ?? 0 }}</strong>
-                    <p>Accounts currently suspended from web and API sign-in.</p>
-                </article>
-                <article class="metric-card">
-                    <span>Audit Today</span>
-                    <strong>{{ $stats['audit_entries_today'] ?? 0 }}</strong>
-                    <p>Responder actions recorded today for civilian account control.</p>
-                </article>
             </div>
         </div>
     </section>

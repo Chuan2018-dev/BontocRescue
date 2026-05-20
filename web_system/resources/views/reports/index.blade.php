@@ -204,19 +204,20 @@
 @section('title', $isCivilian ? 'Report History' : 'Incident Feed')
 @section('page_label', $isCivilian ? 'Report History' : 'Incident Feed')
 @section('page_heading', $isCivilian ? 'My Submitted Reports' : 'Live Report Management')
-@section('page_subheading', $isCivilian ? 'Review only the reports you submitted, including status, evidence, verification selfie, and transmission details.' : 'Search, filter, assign, and resolve incidents while keeping evidence, verification selfies, and GPS context visible in one workspace.')
+@section('page_subheading', $isCivilian ? 'Review only the reports you submitted, including status, evidence, verification selfie, and transmission details.' : 'Search, filter, assign, and resolve incidents in a cleaner responder workspace.')
 
 @section('hero')
-    <section class="hero-card">
+    <section class="hero-card responder-lean-hero">
         <div class="hero-grid">
             <div class="hero-copy">
                 <p class="eyebrow">{{ $isCivilian ? 'Personal History' : 'Operations Queue' }}</p>
-                <h2>{{ $isCivilian ? 'Track your own emergency submissions without responder-only controls.' : 'Manage the incident queue from one cleaner, responder-friendly workspace.' }}</h2>
+                <h2>{{ $isCivilian ? 'Track your emergency submissions without extra clutter.' : 'Manage the incident queue without extra dashboard clutter.' }}</h2>
                 <p>
                     @if ($isCivilian)
-                        This report history is limited to your civilian account. You can review your submitted incidents, attached evidence, verification selfies, and current status updates.
+                        Review your submitted incidents, attached evidence, verification selfies, and current status updates from one simple history view.
                     @else
-                        Use filters first, scan the report cards second, then open details only when a case needs deeper coordination. All existing responder functions stay available.
+                        Use filters first, scan the report cards second, then open details only when a case needs deeper coordination.
+                        All responder assignment, status, evidence, and map functions stay available.
                     @endif
                 </p>
                 <div class="hero-actions">
@@ -224,40 +225,11 @@
                     <a href="{{ $isCivilian ? route('dashboard') : route('monitoring') }}" class="btn btn-secondary">Back To Dashboard</a>
                 </div>
             </div>
-            <div class="hero-metrics">
-                <article class="metric-card"><span>Total reports</span><strong>{{ $stats['total'] }}</strong><p>{{ $isCivilian ? 'Reports submitted from your civilian account.' : 'All incidents stored in the system.' }}</p></article>
-                <article class="metric-card"><span>Active queue</span><strong>{{ $stats['active'] }}</strong><p>{{ $isCivilian ? 'Your reports that are still active or under response.' : 'Open incidents still under monitoring or response.' }}</p></article>
-                <article class="metric-card"><span>Fatal alerts</span><strong>{{ $stats['fatal'] }}</strong><p>{{ $isCivilian ? 'Your submitted reports tagged as fatal severity.' : 'Critical cases that need rapid coordination.' }}</p></article>
-                <article class="metric-card"><span>Online / LoRa</span><strong>{{ $stats['online'] }} / {{ $stats['lora'] }}</strong><p>{{ $isCivilian ? 'Transport mix from your own report history.' : 'Transport balance between full payload and fallback compact reporting.' }}</p></article>
-            </div>
         </div>
     </section>
 @endsection
 
 @section('content')
-    <section class="summary-strip">
-        <article class="summary-card">
-            <span>Total reports</span>
-            <strong>{{ $stats['total'] }}</strong>
-            <p>{{ $isCivilian ? 'Reports available in your personal history.' : 'All reports currently visible in the queue.' }}</p>
-        </article>
-        <article class="summary-card">
-            <span>Active queue</span>
-            <strong>{{ $stats['active'] }}</strong>
-            <p>{{ $isCivilian ? 'Reports still moving through responder review.' : 'Open incidents still waiting for completion.' }}</p>
-        </article>
-        <article class="summary-card">
-            <span>Fatal alerts</span>
-            <strong>{{ $stats['fatal'] }}</strong>
-            <p>{{ $isCivilian ? 'Your fatal-severity submissions.' : 'Critical reports that need fast response.' }}</p>
-        </article>
-        <article class="summary-card">
-            <span>Transport mix</span>
-            <strong>{{ $stats['online'] }} / {{ $stats['lora'] }}</strong>
-            <p>{{ $isCivilian ? 'Online and LoRa reports from your own history.' : 'Online and LoRa visibility across the current queue.' }}</p>
-        </article>
-    </section>
-
     <section class="panel">
         <div class="panel-toolbar">
             <div class="panel-heading">
