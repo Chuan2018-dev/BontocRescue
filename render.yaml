@@ -5,7 +5,7 @@ services:
     dockerfilePath: ./web_system/deploy/render/Dockerfile
     dockerContext: ./web_system
     region: singapore
-    plan: starter
+    plan: free
     autoDeployTrigger: commit
     healthCheckPath: /system/version
     envVars:
@@ -24,19 +24,19 @@ services:
       - key: LOG_LEVEL
         value: info
       - key: DB_CONNECTION
-        value: mysql
+        value: sqlite
       - key: DB_HOST
         sync: false
       - key: DB_PORT
-        value: "3306"
+        value: ""
       - key: DB_DATABASE
-        sync: false
+        value: /var/www/html/database/database.sqlite
       - key: DB_USERNAME
-        sync: false
+        value: ""
       - key: DB_PASSWORD
-        sync: false
+        value: ""
       - key: SESSION_DRIVER
-        value: database
+        value: file
       - key: SESSION_SECURE_COOKIE
         value: "true"
       - key: CACHE_STORE
@@ -44,7 +44,9 @@ services:
       - key: QUEUE_CONNECTION
         value: sync
       - key: FILESYSTEM_DISK
-        value: s3
+        value: local
+      - key: RUN_DEMO_SEEDERS
+        value: "true"
       - key: AWS_ACCESS_KEY_ID
         sync: false
       - key: AWS_SECRET_ACCESS_KEY

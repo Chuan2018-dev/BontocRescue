@@ -16,9 +16,23 @@ mkdir -p \
 
 chown -R www-data:www-data storage bootstrap/cache
 
+if [ "${DB_CONNECTION:-}" = "sqlite" ]; then
+    SQLITE_PATH="${DB_DATABASE:-/var/www/html/database/database.sqlite}"
+    SQLITE_DIR="$(dirname "$SQLITE_PATH")"
+
+    mkdir -p "$SQLITE_DIR"
+    touch "$SQLITE_PATH"
+    chown -R www-data:www-data "$SQLITE_DIR"
+fi
+
+php artisan config:clear
 php artisan storage:link || true
 php artisan migrate --force
-php artisan config:clear
+
+if [ "${RUN_DEMO_SEEDERS:-false}" = "true" ]; then
+    php artisan db:seed --force
+fi
+
 php artisan config:cache
 
 php-fpm -D

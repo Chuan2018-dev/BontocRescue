@@ -35,6 +35,7 @@ RUN apk add --no-cache \
     oniguruma-dev \
     postgresql-dev \
     shadow \
+    sqlite-dev \
     zip \
     && docker-php-ext-install \
     bcmath \
@@ -44,6 +45,7 @@ RUN apk add --no-cache \
     pcntl \
     pdo_pgsql \
     pdo_mysql \
+    pdo_sqlite \
     sockets \
     zip
 
