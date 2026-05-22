@@ -99,6 +99,8 @@ This reports:
 - severity label/confidence
 - responder review flag
 
+By default, the severity model is not allowed to override a rejected photo relevance gate result. This is safer for dummy-photo protection. If the relevance gate rejects real accident photos, retrain the relevance gate with reviewed examples instead of enabling override.
+
 ## Promotion Checklist
 
 Before deploying a new checkpoint:
@@ -117,6 +119,7 @@ For online deployment, these values must match:
 ```env
 AI_SERVICE_CONFIG=configs/bontoc_southern_leyte_production_candidate_external.yaml
 AI_PHOTO_RELEVANCE_CONFIG=configs/bontoc_southern_leyte_photo_relevance.yaml
+AI_RELEVANCE_SEVERITY_OVERRIDE_ENABLED=false
 AI_SEVERITY_CHECKPOINT_URL=https://...
 AI_PHOTO_RELEVANCE_CHECKPOINT_URL=https://...
 ```

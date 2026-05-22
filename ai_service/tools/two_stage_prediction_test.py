@@ -30,6 +30,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--limit", type=int, default=0, help="Max images to scan. Use 0 for no limit.")
     parser.add_argument("--output-csv", default="", help="Optional CSV report output path.")
     parser.add_argument(
+        "--enable-severity-override",
+        action="store_true",
+        help="Allow a confident severity model to override a rejected relevance gate result.",
+    )
+    parser.add_argument(
         "--severity-override-threshold",
         type=float,
         default=0.70,
@@ -96,7 +101,7 @@ def main() -> None:
 
         if accepted:
             severity = severity_predictor.predict_path(image_path)
-        else:
+        elif args.enable_severity_override:
             candidate = severity_predictor.predict_path(image_path)
             if (
                 candidate.confidence >= args.severity_override_threshold
@@ -139,6 +144,7 @@ def main() -> None:
             {
                 "severity_config": str(severity_config.config_path),
                 "relevance_config": str(relevance_config.config_path),
+                "severity_override_enabled": args.enable_severity_override,
                 "images_scanned": len(rows),
                 "accepted": accepted_count,
                 "rejected": rejected_count,

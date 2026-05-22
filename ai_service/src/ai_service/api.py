@@ -65,6 +65,10 @@ def unload_after_predict_enabled() -> bool:
     return truthy_env("AI_UNLOAD_AFTER_PREDICT", default=False)
 
 
+def relevance_severity_override_enabled() -> bool:
+    return truthy_env("AI_RELEVANCE_SEVERITY_OVERRIDE_ENABLED", default=False)
+
+
 def release_unused_memory() -> None:
     collect()
 
@@ -166,6 +170,7 @@ def warm_predictors() -> dict[str, object]:
         "status": "ready",
         "single_model_cache_enabled": single_model_cache_enabled(),
         "unload_after_predict_enabled": unload_after_predict_enabled(),
+        "relevance_severity_override_enabled": relevance_severity_override_enabled(),
         "severity_predictor_loaded": PREDICTOR is not None,
         "photo_relevance_predictor_loaded": RELEVANCE_PREDICTOR is not None,
     }
@@ -201,6 +206,7 @@ def health() -> dict[str, object]:
         "photo_relevance_checkpoint_path": str(RELEVANCE_CONFIG.outputs.best_checkpoint_path) if RELEVANCE_CONFIG is not None else None,
         "single_model_cache_enabled": single_model_cache_enabled(),
         "unload_after_predict_enabled": unload_after_predict_enabled(),
+        "relevance_severity_override_enabled": relevance_severity_override_enabled(),
         "severity_predictor_loaded": PREDICTOR is not None,
         "photo_relevance_predictor_loaded": RELEVANCE_PREDICTOR is not None,
         "message": "Upload a checkpoint before using /predict." if not CHECKPOINT_EXISTS else "Prediction service ready.",
@@ -224,12 +230,16 @@ async def predict(file: UploadFile = File(...)) -> dict[str, object]:
 
         if relevance is not None:
             if not relevance.accepted:
-                prediction = predict_severity(file_bytes)
-                override_threshold = float_env("AI_RELEVANCE_SEVERITY_OVERRIDE_THRESHOLD", 0.70)
+                relevance_overridden = False
 
-                if prediction.confidence >= override_threshold and not prediction.responder_review_required:
-                    relevance_overridden = True
-                else:
+                if relevance_severity_override_enabled():
+                    prediction = predict_severity(file_bytes)
+                    override_threshold = float_env("AI_RELEVANCE_SEVERITY_OVERRIDE_THRESHOLD", 0.70)
+
+                    if prediction.confidence >= override_threshold and not prediction.responder_review_required:
+                        relevance_overridden = True
+
+                if not relevance_overridden:
                     return {
                         "filename": file.filename,
                         "accepted": False,
