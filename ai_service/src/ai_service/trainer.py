@@ -214,6 +214,7 @@ def train(config: AppConfig) -> dict[str, object]:
     model = build_model(
         num_classes=len(config.experiment.labels),
         pretrained=config.training.pretrained,
+        architecture=config.training.architecture,
     ).to(device)
 
     class_weights = _build_class_weights(config.experiment.labels, _extract_targets(train_records)).to(device)

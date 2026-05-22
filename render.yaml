@@ -124,6 +124,10 @@ services:
     envVars:
       - key: AI_SERVICE_HOST
         value: 0.0.0.0
+      - key: AI_SERVICE_CONFIG
+        value: configs/bontoc_southern_leyte_production_candidate_external.yaml
+      - key: AI_PHOTO_RELEVANCE_CONFIG
+        value: configs/bontoc_southern_leyte_photo_relevance.yaml
       - key: AI_CHECKPOINT_SYNC_ENABLED
         value: "true"
       - key: AI_CHECKPOINT_SYNC_REQUIRED

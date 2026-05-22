@@ -49,9 +49,12 @@ class BaseImagePredictor:
         checkpoint = torch.load(self.checkpoint_path, map_location=self.device, weights_only=False)
 
         self.labels = tuple(checkpoint["labels"])
+        checkpoint_training_config = checkpoint.get("config", {}).get("training", {})
+        self.architecture = checkpoint_training_config.get("architecture", config.training.architecture)
         self.model = build_model(
             num_classes=len(self.labels),
             pretrained=False,
+            architecture=self.architecture,
         ).to(self.device)
         self.model.load_state_dict(checkpoint["model_state_dict"])
         self.model.eval()

@@ -11,6 +11,15 @@ The model is designed to support, not replace, responder judgment.
 - Optional context for later versions: description, location, transport mode, and weather
 - Operational focus: Bontoc, Southern Leyte road and emergency conditions
 
+## Recommended Training Approach
+
+Use the two-stage server-side training workflow instead of Teachable Machine for the production system:
+
+1. photo relevance gate: `related` vs `unrelated`
+2. severity classifier: `minor`, `serious`, `fatal`
+
+The implementation supports `resnet18`, `mobilenet_v3_small`, and `efficientnet_b0` transfer learning. See `RECOMMENDED_AI_TRAINING_WORKFLOW.md` for the exact workflow, dummy-photo evaluation, and promotion checklist.
+
 ## Project Layout
 
 ```text
