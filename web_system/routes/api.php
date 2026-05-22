@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\IncidentReportApiController;
+use App\Http\Controllers\Api\LoRaAlertIngestController;
 use App\Http\Controllers\Api\ProfileApiController;
 use App\Http\Controllers\Api\SettingsApiController;
 use Illuminate\Support\Facades\Route;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function (): void {
     Route::post('/auth/register', [AuthApiController::class, 'register']);
     Route::post('/auth/login', [AuthApiController::class, 'login']);
+    Route::post('/lora/alerts', LoRaAlertIngestController::class);
 
     Route::middleware('api.token')->group(function (): void {
         Route::get('/auth/me', [AuthApiController::class, 'me']);

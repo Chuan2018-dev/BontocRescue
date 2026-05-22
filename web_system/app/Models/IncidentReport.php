@@ -46,6 +46,15 @@ class IncidentReport extends Model
         'transmitted_at',
         'resolved_at',
         'status_updated_at',
+        'hardware_source',
+        'lora_sender_id',
+        'lora_sequence',
+        'lora_gateway_id',
+        'lora_gateway_rssi',
+        'lora_gateway_snr',
+        'lora_receiver_rssi',
+        'lora_receiver_snr',
+        'lora_satellites',
     ];
 
     protected function casts(): array
@@ -62,6 +71,11 @@ class IncidentReport extends Model
             'reporter_selfie_captured_at' => 'datetime',
             'coordination_log' => 'array',
             'status_updated_at' => 'datetime',
+            'lora_gateway_rssi' => 'integer',
+            'lora_gateway_snr' => 'decimal:2',
+            'lora_receiver_rssi' => 'integer',
+            'lora_receiver_snr' => 'decimal:2',
+            'lora_satellites' => 'integer',
         ];
     }
 

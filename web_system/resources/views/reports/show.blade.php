@@ -270,6 +270,12 @@
                 <div class="detail-card"><strong>Channel</strong><p>{{ $report->channel ?: 'Internet' }}</p></div>
                 <div class="detail-card"><strong>Transmitted at</strong><p>{{ optional($report->transmitted_at)->format('M d, Y h:i A') ?? 'Pending' }}</p></div>
                 <div class="detail-card"><strong>Status updated</strong><p>{{ optional($report->status_updated_at)->format('M d, Y h:i A') ?? 'Not yet updated' }}</p></div>
+                @if ($report->transmission_type === 'lora')
+                    <div class="detail-card"><strong>LoRa sender</strong><p>{{ $report->lora_sender_id ?: 'Unknown sender' }} @if($report->lora_sequence)| Seq {{ $report->lora_sequence }}@endif</p></div>
+                    <div class="detail-card"><strong>Gateway</strong><p>{{ $report->lora_gateway_id ?: 'Unknown gateway' }}</p></div>
+                    <div class="detail-card"><strong>Signal</strong><p>GW RSSI {{ $report->lora_gateway_rssi ?? 'n/a' }} / RX RSSI {{ $report->lora_receiver_rssi ?? 'n/a' }}</p></div>
+                    <div class="detail-card"><strong>GPS satellites</strong><p>{{ $report->lora_satellites ?? 'n/a' }}</p></div>
+                @endif
             </div>
         </article>
     </section>

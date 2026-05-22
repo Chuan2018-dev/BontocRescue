@@ -18,6 +18,11 @@ Thumbs.db
 *.log
 tool/runtime/
 
+# Arduino local deployment secrets
+Arduino.zip
+Arduino/**/arduino_secrets.h
+Arduino/**/libraries/
+
 # Python
 **/__pycache__/
 **/*.py[cod]

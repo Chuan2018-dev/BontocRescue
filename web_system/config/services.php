@@ -53,6 +53,10 @@ return [
         'require_civilian_photo_gate' => env('AI_SEVERITY_REQUIRE_CIVILIAN_PHOTO_GATE', false),
     ],
 
+    'lora_ingest' => [
+        'token' => env('LORA_INGEST_TOKEN'),
+    ],
+
     'routing' => [
         'enabled' => env('ROUTING_SERVICE_ENABLED', env('APP_ENV') !== 'testing'),
         'url' => env('ROUTING_SERVICE_URL', 'https://router.project-osrm.org'),
